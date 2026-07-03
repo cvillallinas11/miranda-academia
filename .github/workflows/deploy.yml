@@ -45,28 +45,15 @@ jobs:
       - name: Deploy to VPS
         run: |
           ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
-            ${{ secrets.VPS_USER }}@${{ secrets.VPS_HOST }} <<'EOSSH'
-          set -e
-          cd /opt/apps/stable-stars
-          echo "📦 Fetching latest code..."
-          git fetch origin main
-          git reset --hard origin/main
-
-          echo "🔧 Ensuring data directory permissions..."
-          mkdir -p data
-          if [ -w data ]; then
-            chown -R 1001:1001 data || sudo -n chown -R 1001:1001 data || true
-          fi
-
-          echo "🐳 Building and starting containers..."
-          docker compose pull --ignore-pull-failures || true
-          docker compose up -d --build --remove-orphans
-
-          echo "⏳ Waiting for app to be ready..."
-          sleep 3
-
-          echo "✅ Deployment complete"
-          EOSSH
+            deploy@${{ secrets.VPS_HOST }} \
+            "cd /opt/apps/stable-stars && \
+             git fetch origin main && \
+             git reset --hard origin/main && \
+             mkdir -p data && \
+             chown -R 1001:1001 data 2>/dev/null || sudo -n chown -R 1001:1001 data || true && \
+             docker compose pull --ignore-pull-failures || true && \
+             docker compose up -d --build --remove-orphans && \
+             echo '✅ Deployment complete'"
 
       - name: Verify deployment
         run: |
