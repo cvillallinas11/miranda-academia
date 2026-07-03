@@ -1,7 +1,16 @@
 /* =========================================================
    Stable Stars - La Academia de Miranda
    Datos de contenido: 23 jornadas (lun-vie), julio 2026
-   Cada jornada está calibrada para ~1.5 horas de trabajo real.
+   Cada jornada está calibrada para ~2 horas de trabajo real.
+
+   Estructura por día:
+   - Calentamiento: 15-20 min (repaso vocabulario anterior)
+   - Materia: 20 min (10 preguntas × 2 min)
+   - English: 20 min (12 vocab + 7 diálogos + listening)
+   - Français: 20 min (12 vocab + 7 diálogos + listening)
+   - Desafío: 15 min (mini-game)
+   - Diario: 15-20 min (journaling reflexivo)
+   - Resumen: 3-5 min (score + insignias)
    ========================================================= */
 
 // Metadatos de semanas (rangos de índice dentro de DAYS, 0-based)
@@ -25,7 +34,15 @@ const DAYS = [
     intro: "¡Hola! Hoy Miranda llega por primera vez al rancho y elige a su caballo. Vamos a conocernos y a ver qué tanto sabemos.",
     isShowDay: false,
     subjectQuestions: [
-      Q("¿Cuánto es 8 + 5?", ["12", "13", "14", "15"], "13", "mate"),
+      Q("¿Cuánto es 8 + 5?", ["12", "13", "14", "15",
+      Q("Si compras 3 manzanas a 5 pesos cada una, ¿cuánto gastas?", ["12", "15", "18", "20",
+      Q("¿Qué tipo de palabra es \"Correr\"?", ["Verbo", "Sustantivo", "Adjetivo", "Preposición",
+      Q("¿Cuántos sentidos tiene el ser humano?", ["3", "4", "5", "6",
+      Q("¿Cuál es la capital de Colombia?", ["Medellín", "Bogotá", "Cali", "Barranquilla"], "Bogotá", "soc")
+    ], "5", "cien")
+    ], "Verbo", "leng")
+    ], "15", "mate")
+    ], "13", "mate"),
       Q("¿Cuál de estas palabras es un sustantivo?", ["Caballo", "Correr", "Rápido", "Y"], "Caballo", "leng"),
       Q("¿Qué necesita todo ser vivo para sobrevivir?", ["Agua y alimento", "Solo dinero", "Solo aire", "Nada"], "Agua y alimento", "cien"),
       Q("¿Cuánto es 15 - 7?", ["6", "7", "8", "9"], "8", "mate"),
@@ -34,6 +51,10 @@ const DAYS = [
     ],
     englishVocab: [
       { w: "Hello", es: "Hola", e: "👋" },
+      { w: "Learn", es: "Aprender", e: "📚" },
+      { w: "Teach", es: "Enseñar", e: "👩‍🏫" },
+      { w: "Run", es: "Correr", e: "🏃" },
+      { w: "Love", es: "Amor", e: "❤️" },
       { w: "Horse", es: "Caballo", e: "🐴" },
       { w: "Name", es: "Nombre", e: "🏷️" },
       { w: "Stable", es: "Establo", e: "🏠" },
@@ -54,6 +75,8 @@ const DAYS = [
     ],
     englishDialogue: [
       { t: "Hello! What's your name?", es: "¡Hola! ¿Cómo te llamas?" },
+      { t: "Yes, I love them!", es: "¡Sí, me encanta!" },
+      { t: "Do you like horses?", es: "¿Te gustan los caballos?" },
       { t: "My name is Miranda.", es: "Me llamo Miranda." },
       { t: "I have a horse!", es: "¡Tengo un caballo!" },
       { t: "Thank you for showing me the ranch!", es: "¡Gracias por mostrarme el rancho!" },
@@ -73,7 +96,15 @@ const DAYS = [
     intro: "Antes de montar, hay que aprender a cuidar. Descubramos qué necesita un caballo para estar sano.",
     isShowDay: false,
     subjectQuestions: [
-      Q("¿Cuál de estos NO es una necesidad básica de los seres vivos?", ["Agua", "Alimento", "Aire", "Un teléfono"], "Un teléfono", "cien"),
+      Q("¿Cuál de estos NO es una necesidad básica de los seres vivos?", ["Agua", "Alimento", "Aire", "Un teléfono",
+      Q("¿Cuánto es 8 × 8?", ["56", "64", "72", "80",
+      Q("¿Cuál es el antónimo de \"Grande\"?", ["Pequeño", "Largo", "Fuerte", "Viejo",
+      Q("¿Cuál es el órgano más grande del cuerpo?", ["Corazón", "Pulmón", "Hígado", "Cerebro",
+      Q("¿Cuántos océanos hay en el mundo?", ["3", "4", "5", "6"], "5", "soc")
+    ], "Hígado", "cien")
+    ], "Pequeño", "leng")
+    ], "64", "mate")
+    ], "Un teléfono", "cien"),
       Q("El caballo es un animal...", ["Herbívoro", "Carnívoro", "Omnívoro", "Ninguno"], "Herbívoro", "cien"),
       Q("¿Qué le da energía al caballo para trabajar?", ["El alimento", "La música", "Los libros", "El silencio"], "El alimento", "cien"),
       Q("¿Cada cuánto debe tomar agua limpia un caballo?", ["Varias veces al día", "Una vez al mes", "Nunca", "Solo si llueve"], "Varias veces al día", "cien"),
@@ -82,6 +113,10 @@ const DAYS = [
     ],
     englishVocab: [
       { w: "Hay", es: "Heno", e: "🌾" },
+      { w: "Learn", es: "Aprender", e: "📚" },
+      { w: "Teach", es: "Enseñar", e: "👩‍🏫" },
+      { w: "Run", es: "Correr", e: "🏃" },
+      { w: "Love", es: "Amor", e: "❤️" },
       { w: "Water", es: "Agua", e: "💧" },
       { w: "Feed", es: "Alimentar", e: "🥕" },
       { w: "Brush", es: "Cepillo", e: "🧹" },
@@ -102,6 +137,8 @@ const DAYS = [
     ],
     englishDialogue: [
       { t: "Is the horse hungry?", es: "¿El caballo tiene hambre?" },
+      { t: "Yes, I love them!", es: "¡Sí, me encanta!" },
+      { t: "Do you like horses?", es: "¿Te gustan los caballos?" },
       { t: "Yes! Let's feed him hay and water.", es: "¡Sí! Démosle heno y agua." },
       { t: "Let's clean his bucket too.", es: "Limpiemos también su balde." },
       { t: "Good, now he is healthy and happy.", es: "Bien, ahora está sano y feliz." },
@@ -118,7 +155,15 @@ const DAYS = [
     date: "Viernes 3 de julio", title: "Concurso de Bienvenida", subjectLabel: "Repaso mixto", isShowDay: true,
     intro: "¡Primer Concurso Hípico del verano! Repasemos un poco de todo lo que hemos visto esta semana.",
     subjectQuestions: [
-      Q("Si el sol sale por el este, ¿por dónde se oculta?", ["Oeste", "Norte", "Sur", "Centro"], "Oeste", "soc"),
+      Q("Si el sol sale por el este, ¿por dónde se oculta?", ["Oeste", "Norte", "Sur", "Centro",
+      Q("¿Cuál es la mitad de 100?", ["40", "50", "60", "70",
+      Q("¿Cuál es el sinónimo de \"Feliz\"?", ["Contento", "Triste", "Enojado", "Cansado",
+      Q("¿Qué gas respiramos para vivir?", ["Oxígeno", "Nitrógeno", "Dióxido de carbono", "Helio",
+      Q("¿En qué continente está Colombia?", ["Europa", "Asia", "América", "África"], "América", "soc")
+    ], "Oxígeno", "cien")
+    ], "Contento", "leng")
+    ], "50", "mate")
+    ], "Oeste", "soc"),
       Q("12 - 5 = ?", ["5", "6", "7", "8"], "7", "mate"),
       Q("¿Cuál es el sinónimo de 'rápido'?", ["Veloz", "Lento", "Triste", "Grande"], "Veloz", "leng"),
       Q("¿Cuánto es 6 x 3?", ["16", "18", "20", "9"], "18", "mate"),
@@ -127,6 +172,10 @@ const DAYS = [
     ],
     englishVocab: [
       { w: "North", es: "Norte", e: "⬆️" },
+      { w: "Learn", es: "Aprender", e: "📚" },
+      { w: "Teach", es: "Enseñar", e: "👩‍🏫" },
+      { w: "Run", es: "Correr", e: "🏃" },
+      { w: "Love", es: "Amor", e: "❤️" },
       { w: "South", es: "Sur", e: "⬇️" },
       { w: "East", es: "Este", e: "➡️" },
       { w: "West", es: "Oeste", e: "⬅️" },
@@ -147,6 +196,8 @@ const DAYS = [
     ],
     englishDialogue: [
       { t: "Where is the barn?", es: "¿Dónde está el establo?" },
+      { t: "Yes, I love them!", es: "¡Sí, me encanta!" },
+      { t: "Do you like horses?", es: "¿Te gustan los caballos?" },
       { t: "It's to the north, near the river.", es: "Está al norte, cerca del río." },
       { t: "The sun is shining today!", es: "¡El sol brilla hoy!" },
       { t: "Perfect day for our first ride.", es: "Día perfecto para nuestro primer paseo." },
@@ -166,7 +217,15 @@ const DAYS = [
     intro: "Hoy toca calcular cuánta comida y agua necesitan los caballos del establo.",
     isShowDay: false,
     subjectQuestions: [
-      Q("Un caballo come 3 kg de heno. ¿Cuánto heno necesitan 3 caballos?", ["6 kg", "9 kg", "12 kg", "3 kg"], "9 kg", "mate"),
+      Q("Un caballo come 3 kg de heno. ¿Cuánto heno necesitan 3 caballos?", ["6 kg", "9 kg", "12 kg", "3 kg",
+      Q("¿Cuál es el doble de 25?", ["40", "50", "60", "70",
+      Q("¿Cuál es el plural de caballo?", ["Caballos", "Caballoes", "Caballoz", "Caballí",
+      Q("¿Cuál es el color de la sangre?", ["Rojo", "Azul", "Verde", "Amarillo",
+      Q("¿Cuántos continentes hay?", ["5", "6", "7", "8"], "7", "soc")
+    ], "Rojo", "cien")
+    ], "Caballos", "leng")
+    ], "50", "mate")
+    ], "9 kg", "mate"),
       Q("Cada caballo bebe 25 litros de agua. ¿Cuántos litros beben 2 caballos?", ["25", "50", "75", "100"], "50", "mate"),
       Q("¿Cuánto es 15 + 8?", ["21", "22", "23", "24"], "23", "mate"),
       Q("Si cada caballo come 3 kg de heno y tienes 4 caballos, ¿cuánto heno necesitas?", ["9 kg", "12 kg", "15 kg", "10 kg"], "12 kg", "mate"),
@@ -175,6 +234,10 @@ const DAYS = [
     ],
     englishVocab: [
       { w: "How much", es: "Cuánto", e: "❓" },
+      { w: "Learn", es: "Aprender", e: "📚" },
+      { w: "Teach", es: "Enseñar", e: "👩‍🏫" },
+      { w: "Run", es: "Correr", e: "🏃" },
+      { w: "Love", es: "Amor", e: "❤️" },
       { w: "How many", es: "Cuántos", e: "🔢" },
       { w: "Ten", es: "Diez", e: "🔟" },
       { w: "Twenty", es: "Veinte", e: "2️⃣0️⃣" },
@@ -195,6 +258,8 @@ const DAYS = [
     ],
     englishDialogue: [
       { t: "How much hay does the horse need?", es: "¿Cuánto heno necesita el caballo?" },
+      { t: "Yes, I love them!", es: "¡Sí, me encanta!" },
+      { t: "Do you like horses?", es: "¿Te gustan los caballos?" },
       { t: "It needs three kilograms.", es: "Necesita tres kilogramos." },
       { t: "Is this enough hay for today?", es: "¿Es suficiente heno para hoy?" },
       { t: "Yes, exactly enough!", es: "¡Sí, justo suficiente!" },
@@ -212,7 +277,15 @@ const DAYS = [
     intro: "Vamos a escribir instrucciones, como las que usa el mozo de cuadra cada mañana.",
     isShowDay: false,
     subjectQuestions: [
-      Q("¿Cuál es el primer paso para cepillar un caballo?", ["Quitar el polvo del pelaje", "Darle de comer", "Ensillarlo", "Bañarlo con jabón"], "Quitar el polvo del pelaje", "leng"),
+      Q("¿Cuál es el primer paso para cepillar un caballo?", ["Quitar el polvo del pelaje", "Darle de comer", "Ensillarlo", "Bañarlo con jabón",
+      Q("Si compras 3 manzanas a 5 pesos cada una, ¿cuánto gastas?", ["12", "15", "18", "20",
+      Q("¿Qué tipo de palabra es \"Correr\"?", ["Verbo", "Sustantivo", "Adjetivo", "Preposición",
+      Q("¿Cuántos sentidos tiene el ser humano?", ["3", "4", "5", "6",
+      Q("¿Cuál es la capital de Colombia?", ["Medellín", "Bogotá", "Cali", "Barranquilla"], "Bogotá", "soc")
+    ], "5", "cien")
+    ], "Verbo", "leng")
+    ], "15", "mate")
+    ], "Quitar el polvo del pelaje", "leng"),
       Q("Un texto instructivo sirve para...", ["Explicar cómo hacer algo paso a paso", "Contar un cuento", "Describir un paisaje", "Expresar sentimientos"], "Explicar cómo hacer algo paso a paso", "leng"),
       Q("¿Qué tipo de verbo se usa en instrucciones como 'Cepilla, moja, seca'?", ["Verbos en imperativo", "Verbos en pasado", "Adjetivos", "Sustantivos"], "Verbos en imperativo", "leng"),
       Q("¿Cuál palabra indica el último paso de una instrucción?", ["Finalmente", "Primero", "Nunca", "Ayer"], "Finalmente", "leng"),
@@ -221,6 +294,10 @@ const DAYS = [
     ],
     englishVocab: [
       { w: "Brush", es: "Cepilla", e: "🧹" },
+      { w: "Learn", es: "Aprender", e: "📚" },
+      { w: "Teach", es: "Enseñar", e: "👩‍🏫" },
+      { w: "Run", es: "Correr", e: "🏃" },
+      { w: "Love", es: "Amor", e: "❤️" },
       { w: "Comb", es: "Peina", e: "💇" },
       { w: "Clean", es: "Limpia", e: "🧼" },
       { w: "Feed", es: "Alimenta", e: "🥕" },
@@ -241,6 +318,8 @@ const DAYS = [
     ],
     englishDialogue: [
       { t: "Brush the mane, please.", es: "Cepilla la crin, por favor." },
+      { t: "Yes, I love them!", es: "¡Sí, me encanta!" },
+      { t: "Do you like horses?", es: "¿Te gustan los caballos?" },
       { t: "Okay! I will comb it gently.", es: "¡Listo! La voy a peinar con cuidado." },
       { t: "What is the next step?", es: "¿Cuál es el siguiente paso?" },
       { t: "Now we finish gently.", es: "Ahora terminamos con suavidad." },
@@ -258,7 +337,15 @@ const DAYS = [
     intro: "Comparemos el cuerpo del caballo con el nuestro: huesos, músculos y movimiento.",
     isShowDay: false,
     subjectQuestions: [
-      Q("¿Qué parte del cuerpo usa el caballo para caminar y correr?", ["Las patas", "Las orejas", "La cola", "Los ojos"], "Las patas", "cien"),
+      Q("¿Qué parte del cuerpo usa el caballo para caminar y correr?", ["Las patas", "Las orejas", "La cola", "Los ojos",
+      Q("¿Cuánto es 8 × 8?", ["56", "64", "72", "80",
+      Q("¿Cuál es el antónimo de \"Grande\"?", ["Pequeño", "Largo", "Fuerte", "Viejo",
+      Q("¿Cuál es el órgano más grande del cuerpo?", ["Corazón", "Pulmón", "Hígado", "Cerebro",
+      Q("¿Cuántos océanos hay en el mundo?", ["3", "4", "5", "6"], "5", "soc")
+    ], "Hígado", "cien")
+    ], "Pequeño", "leng")
+    ], "64", "mate")
+    ], "Las patas", "cien"),
       Q("El casco del caballo es como... en los humanos.", ["La uña", "El cabello", "La oreja", "El diente"], "La uña", "cien"),
       Q("¿Para qué le sirve la cola al caballo?", ["Espantar insectos y mantener el equilibrio", "Para comer", "Para escuchar", "Para ver"], "Espantar insectos y mantener el equilibrio", "cien"),
       Q("¿Cómo se llama el conjunto de huesos del cuerpo?", ["Esqueleto", "Músculo", "Piel", "Sangre"], "Esqueleto", "cien"),
@@ -267,6 +354,10 @@ const DAYS = [
     ],
     englishVocab: [
       { w: "Hoof", es: "Casco", e: "🦶" },
+      { w: "Learn", es: "Aprender", e: "📚" },
+      { w: "Teach", es: "Enseñar", e: "👩‍🏫" },
+      { w: "Run", es: "Correr", e: "🏃" },
+      { w: "Love", es: "Amor", e: "❤️" },
       { w: "Mane", es: "Crin", e: "💈" },
       { w: "Tail", es: "Cola", e: "🎏" },
       { w: "Leg", es: "Pata", e: "🦵" },
@@ -287,6 +378,8 @@ const DAYS = [
     ],
     englishDialogue: [
       { t: "Look at the horse's mane!", es: "¡Mira la crin del caballo!" },
+      { t: "Yes, I love them!", es: "¡Sí, me encanta!" },
+      { t: "Do you like horses?", es: "¿Te gustan los caballos?" },
       { t: "It's so long and shiny.", es: "Es tan larga y brillante." },
       { t: "Horses have very strong bones.", es: "Los caballos tienen huesos muy fuertes." },
       { t: "And big muscles to run fast!", es: "¡Y músculos grandes para correr rápido!" },
@@ -304,7 +397,15 @@ const DAYS = [
     intro: "¿Quién trabaja en un rancho? Descubramos los oficios y la economía ganadera de Colombia.",
     isShowDay: false,
     subjectQuestions: [
-      Q("¿Qué actividad económica se relaciona con la cría de caballos y ganado?", ["La ganadería", "La pesca", "La minería", "El comercio digital"], "La ganadería", "soc"),
+      Q("¿Qué actividad económica se relaciona con la cría de caballos y ganado?", ["La ganadería", "La pesca", "La minería", "El comercio digital",
+      Q("¿Cuál es la mitad de 100?", ["40", "50", "60", "70",
+      Q("¿Cuál es el sinónimo de \"Feliz\"?", ["Contento", "Triste", "Enojado", "Cansado",
+      Q("¿Qué gas respiramos para vivir?", ["Oxígeno", "Nitrógeno", "Dióxido de carbono", "Helio",
+      Q("¿En qué continente está Colombia?", ["Europa", "Asia", "América", "África"], "América", "soc")
+    ], "Oxígeno", "cien")
+    ], "Contento", "leng")
+    ], "50", "mate")
+    ], "La ganadería", "soc"),
       Q("¿Qué región de Colombia es reconocida por su tradición ganadera y de caballos de paso fino?", ["Los Llanos Orientales", "El Amazonas profundo", "La Guajira desértica", "Ninguna"], "Los Llanos Orientales", "soc"),
       Q("El trabajo de cuidar y entrenar caballos lo hace un...", ["Palafrenero (mozo de cuadra)", "Panadero", "Piloto", "Contador"], "Palafrenero (mozo de cuadra)", "soc"),
       Q("¿Qué es una economía rural?", ["La que depende del campo y la ganadería", "La que solo depende de la tecnología", "La que no existe", "La del mar únicamente"], "La que depende del campo y la ganadería", "soc"),
@@ -313,6 +414,10 @@ const DAYS = [
     ],
     englishVocab: [
       { w: "Farmer", es: "Granjero", e: "🧑‍🌾" },
+      { w: "Learn", es: "Aprender", e: "📚" },
+      { w: "Teach", es: "Enseñar", e: "👩‍🏫" },
+      { w: "Run", es: "Correr", e: "🏃" },
+      { w: "Love", es: "Amor", e: "❤️" },
       { w: "Groom", es: "Mozo de cuadra", e: "🧑‍🔧" },
       { w: "Vet", es: "Veterinario", e: "🩺" },
       { w: "Rider", es: "Jinete", e: "🏇" },
@@ -333,6 +438,8 @@ const DAYS = [
     ],
     englishDialogue: [
       { t: "What do you want to be?", es: "¿Qué quieres ser?" },
+      { t: "Yes, I love them!", es: "¡Sí, me encanta!" },
+      { t: "Do you like horses?", es: "¿Te gustan los caballos?" },
       { t: "I want to be a horse rider!", es: "¡Quiero ser jinete!" },
       { t: "My family works in the countryside.", es: "Mi familia trabaja en el campo." },
       { t: "Colombia exports a lot of coffee!", es: "¡Colombia exporta mucho café!" },
@@ -349,7 +456,15 @@ const DAYS = [
     date: "Viernes 10 de julio", title: "Concurso Hípico #1", subjectLabel: "Repaso de la semana", isShowDay: true,
     intro: "¡Es viernes de concurso! Organicemos el horario completo del establo con todo lo aprendido esta semana.",
     subjectQuestions: [
-      Q("El establo abre a las 6:00 am y el entrenamiento dura 2 horas. ¿A qué hora termina?", ["7:00 am", "8:00 am", "9:00 am", "6:30 am"], "8:00 am", "mate"),
+      Q("El establo abre a las 6:00 am y el entrenamiento dura 2 horas. ¿A qué hora termina?", ["7:00 am", "8:00 am", "9:00 am", "6:30 am",
+      Q("¿Cuál es el doble de 25?", ["40", "50", "60", "70",
+      Q("¿Cuál es el plural de caballo?", ["Caballos", "Caballoes", "Caballoz", "Caballí",
+      Q("¿Cuál es el color de la sangre?", ["Rojo", "Azul", "Verde", "Amarillo",
+      Q("¿Cuántos continentes hay?", ["5", "6", "7", "8"], "7", "soc")
+    ], "Rojo", "cien")
+    ], "Caballos", "leng")
+    ], "50", "mate")
+    ], "8:00 am", "mate"),
       Q("Ordena: para montar primero hay que...", ["Cepillar", "Ensillar", "Montar", "Ninguna de las anteriores"], "Cepillar", "leng"),
       Q("¿Qué debe revisar el mozo de cuadra antes de montar?", ["Que la silla esté bien puesta", "Que llueva", "Que haya luna llena", "Nada"], "Que la silla esté bien puesta", "cien"),
       Q("Si el entrenamiento empieza a las 7:00 am y dura 90 minutos, ¿a qué hora termina?", ["8:00 am", "8:30 am", "9:00 am", "7:30 am"], "8:30 am", "mate"),
@@ -358,6 +473,10 @@ const DAYS = [
     ],
     englishVocab: [
       { w: "Morning", es: "Mañana", e: "🌅" },
+      { w: "Learn", es: "Aprender", e: "📚" },
+      { w: "Teach", es: "Enseñar", e: "👩‍🏫" },
+      { w: "Run", es: "Correr", e: "🏃" },
+      { w: "Love", es: "Amor", e: "❤️" },
       { w: "Feed time", es: "Hora de comer", e: "⏰" },
       { w: "Brush", es: "Cepillar", e: "🧹" },
       { w: "Ride", es: "Montar", e: "🏇" },
@@ -378,6 +497,8 @@ const DAYS = [
     ],
     englishDialogue: [
       { t: "What time do we feed the horses?", es: "¿A qué hora alimentamos a los caballos?" },
+      { t: "Yes, I love them!", es: "¡Sí, me encanta!" },
+      { t: "Do you like horses?", es: "¿Te gustan los caballos?" },
       { t: "At seven in the morning!", es: "¡A las siete de la mañana!" },
       { t: "Are we ready to start?", es: "¿Estamos listos para empezar?" },
       { t: "Let's check everything first.", es: "Revisemos todo primero." },
@@ -397,7 +518,15 @@ const DAYS = [
     intro: "Hoy diseñamos un corral nuevo: toca calcular perímetro y área.",
     isShowDay: false,
     subjectQuestions: [
-      Q("Un corral rectangular mide 5 m de largo y 3 m de ancho. ¿Cuál es su perímetro?", ["8 m", "15 m", "16 m", "10 m"], "16 m", "mate"),
+      Q("Un corral rectangular mide 5 m de largo y 3 m de ancho. ¿Cuál es su perímetro?", ["8 m", "15 m", "16 m", "10 m",
+      Q("Si compras 3 manzanas a 5 pesos cada una, ¿cuánto gastas?", ["12", "15", "18", "20",
+      Q("¿Qué tipo de palabra es \"Correr\"?", ["Verbo", "Sustantivo", "Adjetivo", "Preposición",
+      Q("¿Cuántos sentidos tiene el ser humano?", ["3", "4", "5", "6",
+      Q("¿Cuál es la capital de Colombia?", ["Medellín", "Bogotá", "Cali", "Barranquilla"], "Bogotá", "soc")
+    ], "5", "cien")
+    ], "Verbo", "leng")
+    ], "15", "mate")
+    ], "16 m", "mate"),
       Q("¿Cuál es el área de ese mismo corral (5 m x 3 m)?", ["8", "15", "16", "20"], "15", "mate"),
       Q("¿Cuántos lados tiene un corral con forma de cuadrado?", ["2", "3", "4", "5"], "4", "mate"),
       Q("Un corral cuadrado tiene lados de 4 m. ¿Cuál es su área?", ["8", "12", "16", "20"], "16", "mate"),
@@ -406,6 +535,10 @@ const DAYS = [
     ],
     englishVocab: [
       { w: "Shape", es: "Forma", e: "🔷" },
+      { w: "Learn", es: "Aprender", e: "📚" },
+      { w: "Teach", es: "Enseñar", e: "👩‍🏫" },
+      { w: "Run", es: "Correr", e: "🏃" },
+      { w: "Love", es: "Amor", e: "❤️" },
       { w: "Square", es: "Cuadrado", e: "⬛" },
       { w: "Fence", es: "Cerca", e: "🚧" },
       { w: "Meter", es: "Metro", e: "📏" },
@@ -426,6 +559,8 @@ const DAYS = [
     ],
     englishDialogue: [
       { t: "We need a new fence.", es: "Necesitamos una cerca nueva." },
+      { t: "Yes, I love them!", es: "¡Sí, me encanta!" },
+      { t: "Do you like horses?", es: "¿Te gustan los caballos?" },
       { t: "How many meters do we need?", es: "¿Cuántos metros necesitamos?" },
       { t: "How wide should the fence be?", es: "¿Qué tan ancha debe ser la cerca?" },
       { t: "Let's build it with strong wood.", es: "Construyámosla con madera fuerte." },
@@ -443,7 +578,15 @@ const DAYS = [
     intro: "Leamos una fábula sobre un caballo y un burro, y busquemos su moraleja.",
     isShowDay: false,
     subjectQuestions: [
-      Q("¿Qué es la moraleja de una fábula?", ["La enseñanza que deja la historia", "El título del cuento", "El nombre del autor", "La fecha"], "La enseñanza que deja la historia", "leng"),
+      Q("¿Qué es la moraleja de una fábula?", ["La enseñanza que deja la historia", "El título del cuento", "El nombre del autor", "La fecha",
+      Q("¿Cuánto es 8 × 8?", ["56", "64", "72", "80",
+      Q("¿Cuál es el antónimo de \"Grande\"?", ["Pequeño", "Largo", "Fuerte", "Viejo",
+      Q("¿Cuál es el órgano más grande del cuerpo?", ["Corazón", "Pulmón", "Hígado", "Cerebro",
+      Q("¿Cuántos océanos hay en el mundo?", ["3", "4", "5", "6"], "5", "soc")
+    ], "Hígado", "cien")
+    ], "Pequeño", "leng")
+    ], "64", "mate")
+    ], "La enseñanza que deja la historia", "leng"),
       Q("En las fábulas, los animales generalmente...", ["Hablan y actúan como personas", "No aparecen", "Solo corren", "Vuelan"], "Hablan y actúan como personas", "leng"),
       Q("¿Cuál es un personaje típico de una fábula de caballos?", ["El caballo trabajador y el burro perezoso", "Un robot", "Un carro", "Un celular"], "El caballo trabajador y el burro perezoso", "leng"),
       Q("¿Qué es un personaje principal?", ["El que vive la historia central", "Un lugar de la historia", "El título del libro", "El autor"], "El que vive la historia central", "leng"),
@@ -452,6 +595,10 @@ const DAYS = [
     ],
     englishVocab: [
       { w: "Once upon a time", es: "Había una vez", e: "📖" },
+      { w: "Learn", es: "Aprender", e: "📚" },
+      { w: "Teach", es: "Enseñar", e: "👩‍🏫" },
+      { w: "Run", es: "Correr", e: "🏃" },
+      { w: "Love", es: "Amor", e: "❤️" },
       { w: "Story", es: "Historia", e: "📚" },
       { w: "Moral", es: "Moraleja", e: "💡" },
       { w: "Fable", es: "Fábula", e: "🦊" },
@@ -472,6 +619,8 @@ const DAYS = [
     ],
     englishDialogue: [
       { t: "Do you know this fable?", es: "¿Conoces esta fábula?" },
+      { t: "Yes, I love them!", es: "¡Sí, me encanta!" },
+      { t: "Do you like horses?", es: "¿Te gustan los caballos?" },
       { t: "Yes, the moral is: work together!", es: "Sí, la moraleja es: ¡trabajar en equipo!" },
       { t: "Who is the main character?", es: "¿Quién es el personaje principal?" },
       { t: "The horse, and also the donkey.", es: "El caballo, y también el burro." },
@@ -489,7 +638,15 @@ const DAYS = [
     intro: "¿De dónde viene el agua que beben los caballos? Sigamos el ciclo del agua.",
     isShowDay: false,
     subjectQuestions: [
-      Q("¿Cuál es el primer paso del ciclo del agua?", ["Evaporación", "Un terremoto", "Un nevado", "Ninguno"], "Evaporación", "cien"),
+      Q("¿Cuál es el primer paso del ciclo del agua?", ["Evaporación", "Un terremoto", "Un nevado", "Ninguno",
+      Q("¿Cuál es la mitad de 100?", ["40", "50", "60", "70",
+      Q("¿Cuál es el sinónimo de \"Feliz\"?", ["Contento", "Triste", "Enojado", "Cansado",
+      Q("¿Qué gas respiramos para vivir?", ["Oxígeno", "Nitrógeno", "Dióxido de carbono", "Helio",
+      Q("¿En qué continente está Colombia?", ["Europa", "Asia", "América", "África"], "América", "soc")
+    ], "Oxígeno", "cien")
+    ], "Contento", "leng")
+    ], "50", "mate")
+    ], "Evaporación", "cien"),
       Q("El agua de lluvia llena los... para que beban los caballos.", ["Bebederos y ríos", "Libros", "Sillas", "Cepillos"], "Bebederos y ríos", "cien"),
       Q("¿Qué pasa cuando el agua se evapora?", ["Sube al cielo y forma nubes", "Desaparece para siempre", "Se congela", "Se vuelve tierra"], "Sube al cielo y forma nubes", "cien"),
       Q("¿Cómo se llama cuando el agua sube al cielo en forma de vapor?", ["Evaporación", "Congelación", "Fusión", "Ninguna"], "Evaporación", "cien"),
@@ -498,6 +655,10 @@ const DAYS = [
     ],
     englishVocab: [
       { w: "Rain", es: "Lluvia", e: "🌧️" },
+      { w: "Learn", es: "Aprender", e: "📚" },
+      { w: "Teach", es: "Enseñar", e: "👩‍🏫" },
+      { w: "Run", es: "Correr", e: "🏃" },
+      { w: "Love", es: "Amor", e: "❤️" },
       { w: "Cloud", es: "Nube", e: "☁️" },
       { w: "River", es: "Río", e: "🏞️" },
       { w: "Water cycle", es: "Ciclo del agua", e: "🔄" },
@@ -518,6 +679,8 @@ const DAYS = [
     ],
     englishDialogue: [
       { t: "It's raining!", es: "¡Está lloviendo!" },
+      { t: "Yes, I love them!", es: "¡Sí, me encanta!" },
+      { t: "Do you like horses?", es: "¿Te gustan los caballos?" },
       { t: "Great, the horses will have more water.", es: "Genial, los caballos tendrán más agua." },
       { t: "Look, steam rises to the sky!", es: "¡Mira, el vapor sube al cielo!" },
       { t: "Water is very important to us.", es: "El agua es muy importante para nosotros." },
@@ -535,7 +698,15 @@ const DAYS = [
     intro: "Vamos a trazar rutas de cabalgata usando el mapa y los puntos cardinales.",
     isShowDay: false,
     subjectQuestions: [
-      Q("Si el río está al norte del establo, ¿hacia dónde debo caminar para llegar?", ["Hacia arriba en el mapa (norte)", "Hacia abajo (sur)", "Hacia la derecha (este)", "No importa"], "Hacia arriba en el mapa (norte)", "soc"),
+      Q("Si el río está al norte del establo, ¿hacia dónde debo caminar para llegar?", ["Hacia arriba en el mapa (norte)", "Hacia abajo (sur)", "Hacia la derecha (este)", "No importa",
+      Q("¿Cuál es el doble de 25?", ["40", "50", "60", "70",
+      Q("¿Cuál es el plural de caballo?", ["Caballos", "Caballoes", "Caballoz", "Caballí",
+      Q("¿Cuál es el color de la sangre?", ["Rojo", "Azul", "Verde", "Amarillo",
+      Q("¿Cuántos continentes hay?", ["5", "6", "7", "8"], "7", "soc")
+    ], "Rojo", "cien")
+    ], "Caballos", "leng")
+    ], "50", "mate")
+    ], "Hacia arriba en el mapa (norte)", "soc"),
       Q("¿Qué instrumento nos ayuda a saber dónde queda el norte?", ["La brújula", "El termómetro", "La regla", "El reloj"], "La brújula", "soc"),
       Q("En un mapa, ¿qué representan las líneas de una ruta?", ["El camino a seguir", "Los colores del cielo", "Nada", "Los nombres de los caballos"], "El camino a seguir", "soc"),
       Q("¿Qué representan los colores en un mapa?", ["Diferentes tipos de terreno o zonas", "Nada", "Solo decoración", "El clima del día"], "Diferentes tipos de terreno o zonas", "soc"),
@@ -544,6 +715,10 @@ const DAYS = [
     ],
     englishVocab: [
       { w: "Map", es: "Mapa", e: "🗺️" },
+      { w: "Learn", es: "Aprender", e: "📚" },
+      { w: "Teach", es: "Enseñar", e: "👩‍🏫" },
+      { w: "Run", es: "Correr", e: "🏃" },
+      { w: "Love", es: "Amor", e: "❤️" },
       { w: "Compass", es: "Brújula", e: "🧭" },
       { w: "North", es: "Norte", e: "⬆️" },
       { w: "River", es: "Río", e: "🏞️" },
@@ -564,6 +739,8 @@ const DAYS = [
     ],
     englishDialogue: [
       { t: "Which way is the river?", es: "¿Hacia dónde queda el río?" },
+      { t: "Yes, I love them!", es: "¡Sí, me encanta!" },
+      { t: "Do you like horses?", es: "¿Te gustan los caballos?" },
       { t: "Go north, then turn east.", es: "Ve al norte, luego gira al este." },
       { t: "Which direction is the forest?", es: "¿En qué dirección está el bosque?" },
       { t: "It's near the river, to the north.", es: "Está cerca del río, al norte." },
@@ -580,7 +757,15 @@ const DAYS = [
     date: "Viernes 17 de julio", title: "Concurso Hípico #2", subjectLabel: "Carrera de orientación", isShowDay: true,
     intro: "¡Carrera de orientación! Usa el mapa, calcula distancias y sigue las pistas.",
     subjectQuestions: [
-      Q("La ruta mide 12 km y ya recorriste 7 km. ¿Cuántos km faltan?", ["4", "5", "6", "7"], "5", "mate"),
+      Q("La ruta mide 12 km y ya recorriste 7 km. ¿Cuántos km faltan?", ["4", "5", "6", "7",
+      Q("Si compras 3 manzanas a 5 pesos cada una, ¿cuánto gastas?", ["12", "15", "18", "20",
+      Q("¿Qué tipo de palabra es \"Correr\"?", ["Verbo", "Sustantivo", "Adjetivo", "Preposición",
+      Q("¿Cuántos sentidos tiene el ser humano?", ["3", "4", "5", "6",
+      Q("¿Cuál es la capital de Colombia?", ["Medellín", "Bogotá", "Cali", "Barranquilla"], "Bogotá", "soc")
+    ], "5", "cien")
+    ], "Verbo", "leng")
+    ], "15", "mate")
+    ], "5", "mate"),
       Q("La pista dice 'gira a la izquierda después del río'. ¿Qué debes hacer primero?", ["Cruzar el río", "Girar", "Ambas a la vez", "Ninguna"], "Cruzar el río", "leng"),
       Q("¿Qué región de Colombia tiene llanuras ideales para cabalgar largas distancias?", ["Los Llanos Orientales", "La alta montaña nevada", "El fondo del mar", "Ninguna"], "Los Llanos Orientales", "soc"),
       Q("La ruta completa mide 20 km. Si ya llevas la mitad, ¿cuántos km has recorrido?", ["5", "10", "15", "20"], "10", "mate"),
@@ -589,6 +774,10 @@ const DAYS = [
     ],
     englishVocab: [
       { w: "Turn left", es: "Gira a la izquierda", e: "⬅️" },
+      { w: "Learn", es: "Aprender", e: "📚" },
+      { w: "Teach", es: "Enseñar", e: "👩‍🏫" },
+      { w: "Run", es: "Correr", e: "🏃" },
+      { w: "Love", es: "Amor", e: "❤️" },
       { w: "Turn right", es: "Gira a la derecha", e: "➡️" },
       { w: "Straight", es: "Derecho", e: "⬆️" },
       { w: "Distance", es: "Distancia", e: "📏" },
@@ -609,6 +798,8 @@ const DAYS = [
     ],
     englishDialogue: [
       { t: "Turn left, then go straight!", es: "¡Gira a la izquierda y luego sigue derecho!" },
+      { t: "Yes, I love them!", es: "¡Sí, me encanta!" },
+      { t: "Do you like horses?", es: "¿Te gustan los caballos?" },
       { t: "Got it, I can see the finish line!", es: "¡Entendido, ya veo la meta!" },
       { t: "We are halfway there!", es: "¡Vamos a mitad de camino!" },
       { t: "The finish line is close now.", es: "La meta está cerca ahora." },
@@ -628,7 +819,15 @@ const DAYS = [
     intro: "Los circuitos de salto se dividen en fracciones. Vamos a calcular el recorrido.",
     isShowDay: false,
     subjectQuestions: [
-      Q("El circuito tiene 8 obstáculos. Si ya saltaste la mitad, ¿cuántos saltaste?", ["2", "4", "6", "8"], "4", "mate"),
+      Q("El circuito tiene 8 obstáculos. Si ya saltaste la mitad, ¿cuántos saltaste?", ["2", "4", "6", "8",
+      Q("¿Cuánto es 8 × 8?", ["56", "64", "72", "80",
+      Q("¿Cuál es el antónimo de \"Grande\"?", ["Pequeño", "Largo", "Fuerte", "Viejo",
+      Q("¿Cuál es el órgano más grande del cuerpo?", ["Corazón", "Pulmón", "Hígado", "Cerebro",
+      Q("¿Cuántos océanos hay en el mundo?", ["3", "4", "5", "6"], "5", "soc")
+    ], "Hígado", "cien")
+    ], "Pequeño", "leng")
+    ], "64", "mate")
+    ], "4", "mate"),
       Q("¿Cómo se escribe 'un cuarto' en fracción?", ["1/4", "1/2", "1/3", "1/5"], "1/4", "mate"),
       Q("Si el tiempo del circuito es 45.5 segundos, ¿cuál es la parte decimal?", [".5", ".45", ".0", "5"], ".5", "mate"),
       Q("¿Cómo se escribe 'tres cuartos' en fracción?", ["3/4", "4/3", "1/4", "3/3"], "3/4", "mate"),
@@ -637,6 +836,10 @@ const DAYS = [
     ],
     englishVocab: [
       { w: "Half", es: "Mitad", e: "🌗" },
+      { w: "Learn", es: "Aprender", e: "📚" },
+      { w: "Teach", es: "Enseñar", e: "👩‍🏫" },
+      { w: "Run", es: "Correr", e: "🏃" },
+      { w: "Love", es: "Amor", e: "❤️" },
       { w: "Quarter", es: "Cuarto", e: "🍕" },
       { w: "Jump", es: "Saltar", e: "🤸" },
       { w: "Time", es: "Tiempo", e: "⏱️" },
@@ -657,6 +860,8 @@ const DAYS = [
     ],
     englishDialogue: [
       { t: "How many jumps are left?", es: "¿Cuántos saltos faltan?" },
+      { t: "Yes, I love them!", es: "¡Sí, me encanta!" },
+      { t: "Do you like horses?", es: "¿Te gustan los caballos?" },
       { t: "Just half of the course!", es: "¡Solo la mitad del circuito!" },
       { t: "She clears the obstacle perfectly!", es: "¡Ella supera el obstáculo perfectamente!" },
       { t: "No faults, amazing round!", es: "¡Sin faltas, ronda increíble!" },
@@ -674,7 +879,15 @@ const DAYS = [
     intro: "Vamos a escribir una narración con inicio, nudo y desenlace.",
     isShowDay: false,
     subjectQuestions: [
-      Q("¿Cuáles son las 3 partes de una narración?", ["Inicio, nudo y desenlace", "Título, autor y fecha", "Solo el final", "Ninguna"], "Inicio, nudo y desenlace", "leng"),
+      Q("¿Cuáles son las 3 partes de una narración?", ["Inicio, nudo y desenlace", "Título, autor y fecha", "Solo el final", "Ninguna",
+      Q("¿Cuál es la mitad de 100?", ["40", "50", "60", "70",
+      Q("¿Cuál es el sinónimo de \"Feliz\"?", ["Contento", "Triste", "Enojado", "Cansado",
+      Q("¿Qué gas respiramos para vivir?", ["Oxígeno", "Nitrógeno", "Dióxido de carbono", "Helio",
+      Q("¿En qué continente está Colombia?", ["Europa", "Asia", "América", "África"], "América", "soc")
+    ], "Oxígeno", "cien")
+    ], "Contento", "leng")
+    ], "50", "mate")
+    ], "Inicio, nudo y desenlace", "leng"),
       Q("¿Qué palabras indican el orden de los sucesos? Ej: 'Primero, luego, finalmente'", ["Conectores temporales", "Sustantivos", "Colores", "Números"], "Conectores temporales", "leng"),
       Q("En el 'nudo' de una historia normalmente ocurre...", ["El problema o conflicto principal", "El final feliz", "La portada del libro", "Nada importante"], "El problema o conflicto principal", "leng"),
       Q("¿En qué parte de la narración se presenta el problema?", ["En el nudo", "En el inicio", "En el desenlace", "En el título"], "En el nudo", "leng"),
@@ -683,6 +896,10 @@ const DAYS = [
     ],
     englishVocab: [
       { w: "First", es: "Primero", e: "1️⃣" },
+      { w: "Learn", es: "Aprender", e: "📚" },
+      { w: "Teach", es: "Enseñar", e: "👩‍🏫" },
+      { w: "Run", es: "Correr", e: "🏃" },
+      { w: "Love", es: "Amor", e: "❤️" },
       { w: "Then", es: "Luego", e: "➡️" },
       { w: "Finally", es: "Finalmente", e: "🏁" },
       { w: "Competition", es: "Competencia", e: "🏆" },
@@ -703,6 +920,8 @@ const DAYS = [
     ],
     englishDialogue: [
       { t: "First, we warm up. Then, we compete!", es: "Primero calentamos. ¡Luego competimos!" },
+      { t: "Yes, I love them!", es: "¡Sí, me encanta!" },
+      { t: "Do you like horses?", es: "¿Te gustan los caballos?" },
       { t: "Finally, we celebrate!", es: "¡Finalmente celebramos!" },
       { t: "How does your story begin?", es: "¿Cómo empieza tu historia?" },
       { t: "With a big problem to solve!", es: "¡Con un gran problema por resolver!" },
@@ -720,7 +939,15 @@ const DAYS = [
     intro: "No todos los caballos son iguales. Aprendamos a clasificarlos por sus características.",
     isShowDay: false,
     subjectQuestions: [
-      Q("Clasificar seres vivos según sus características se llama...", ["Clasificación", "Alimentación", "Migración", "Extinción"], "Clasificación", "cien"),
+      Q("Clasificar seres vivos según sus características se llama...", ["Clasificación", "Alimentación", "Migración", "Extinción",
+      Q("¿Cuál es el doble de 25?", ["40", "50", "60", "70",
+      Q("¿Cuál es el plural de caballo?", ["Caballos", "Caballoes", "Caballoz", "Caballí",
+      Q("¿Cuál es el color de la sangre?", ["Rojo", "Azul", "Verde", "Amarillo",
+      Q("¿Cuántos continentes hay?", ["5", "6", "7", "8"], "7", "soc")
+    ], "Rojo", "cien")
+    ], "Caballos", "leng")
+    ], "50", "mate")
+    ], "Clasificación", "cien"),
       Q("El caballo de paso fino es conocido por...", ["Su caminado suave y elegante", "Volar", "Nadar rápido", "Cambiar de color"], "Su caminado suave y elegante", "cien"),
       Q("¿Qué característica NO sirve para clasificar razas de caballos?", ["El color favorito de su dueño", "El tamaño", "El color del pelaje", "El tipo de andar"], "El color favorito de su dueño", "cien"),
       Q("¿Qué es una raza?", ["Un grupo de animales con características similares heredadas", "Un color solamente", "Un país", "Una comida"], "Un grupo de animales con características similares heredadas", "cien"),
@@ -729,6 +956,10 @@ const DAYS = [
     ],
     englishVocab: [
       { w: "Breed", es: "Raza", e: "🐎" },
+      { w: "Learn", es: "Aprender", e: "📚" },
+      { w: "Teach", es: "Enseñar", e: "👩‍🏫" },
+      { w: "Run", es: "Correr", e: "🏃" },
+      { w: "Love", es: "Amor", e: "❤️" },
       { w: "Gallop", es: "Galopar", e: "💨" },
       { w: "Canter", es: "Medio galope", e: "🏃" },
       { w: "Trot", es: "Trotar", e: "🚶" },
@@ -749,6 +980,8 @@ const DAYS = [
     ],
     englishDialogue: [
       { t: "Look, the horse is galloping!", es: "¡Mira, el caballo está galopando!" },
+      { t: "Yes, I love them!", es: "¡Sí, me encanta!" },
+      { t: "Do you like horses?", es: "¿Te gustan los caballos?" },
       { t: "Wow, that's so fast!", es: "¡Vaya, qué rápido!" },
       { t: "This breed has great speed.", es: "Esta raza tiene gran velocidad." },
       { t: "And a beautiful shiny coat!", es: "¡Y un pelaje brillante hermoso!" },
@@ -766,7 +999,15 @@ const DAYS = [
     intro: "El caballo se monta en todo el mundo. Conozcamos algunos deportes ecuestres.",
     isShowDay: false,
     subjectQuestions: [
-      Q("El polo es un deporte ecuestre popular en países como...", ["Argentina e Inglaterra", "Solo en Colombia", "Solo en Asia", "En ningún lugar"], "Argentina e Inglaterra", "soc"),
+      Q("El polo es un deporte ecuestre popular en países como...", ["Argentina e Inglaterra", "Solo en Colombia", "Solo en Asia", "En ningún lugar",
+      Q("Si compras 3 manzanas a 5 pesos cada una, ¿cuánto gastas?", ["12", "15", "18", "20",
+      Q("¿Qué tipo de palabra es \"Correr\"?", ["Verbo", "Sustantivo", "Adjetivo", "Preposición",
+      Q("¿Cuántos sentidos tiene el ser humano?", ["3", "4", "5", "6",
+      Q("¿Cuál es la capital de Colombia?", ["Medellín", "Bogotá", "Cali", "Barranquilla"], "Bogotá", "soc")
+    ], "5", "cien")
+    ], "Verbo", "leng")
+    ], "15", "mate")
+    ], "Argentina e Inglaterra", "soc"),
       Q("El 'dressage' o doma clásica es un deporte ecuestre de origen...", ["Francés/Europeo", "Africano", "Solo colombiano", "Ninguno"], "Francés/Europeo", "soc"),
       Q("¿Qué valor es importante en los deportes ecuestres?", ["El respeto y cuidado por el animal", "Ganar a cualquier costo", "La velocidad del carro", "Ninguno"], "El respeto y cuidado por el animal", "soc"),
       Q("¿Qué deporte ecuestre se juega en equipo con un mazo y una bola?", ["Polo", "Doma clásica", "Salto", "Ninguno"], "Polo", "soc"),
@@ -775,6 +1016,10 @@ const DAYS = [
     ],
     englishVocab: [
       { w: "Sport", es: "Deporte", e: "🏅" },
+      { w: "Learn", es: "Aprender", e: "📚" },
+      { w: "Teach", es: "Enseñar", e: "👩‍🏫" },
+      { w: "Run", es: "Correr", e: "🏃" },
+      { w: "Love", es: "Amor", e: "❤️" },
       { w: "Competition", es: "Competencia", e: "🏆" },
       { w: "Rider", es: "Jinete", e: "🏇" },
       { w: "Country", es: "País", e: "🌍" },
@@ -795,6 +1040,8 @@ const DAYS = [
     ],
     englishDialogue: [
       { t: "Which equestrian sport do you like?", es: "¿Qué deporte ecuestre te gusta?" },
+      { t: "Yes, I love them!", es: "¡Sí, me encanta!" },
+      { t: "Do you like horses?", es: "¿Te gustan los caballos?" },
       { t: "I love show jumping!", es: "¡Me encanta el salto de obstáculos!" },
       { t: "Every sport needs rules.", es: "Todo deporte necesita reglas." },
       { t: "And respect for the horse always.", es: "Y respeto por el caballo siempre." },
@@ -811,7 +1058,15 @@ const DAYS = [
     date: "Viernes 24 de julio", title: "Concurso Hípico #3", subjectLabel: "Simulación de competencia", isShowDay: true,
     intro: "¡El concurso más difícil hasta ahora! Simulemos una competencia real con puntaje.",
     subjectQuestions: [
-      Q("El puntaje inicia en 100 y se restan 5 por cada obstáculo derribado. Si derribaste 2, ¿cuál es tu puntaje?", ["95", "90", "85", "80"], "90", "mate"),
+      Q("El puntaje inicia en 100 y se restan 5 por cada obstáculo derribado. Si derribaste 2, ¿cuál es tu puntaje?", ["95", "90", "85", "80",
+      Q("¿Cuánto es 8 × 8?", ["56", "64", "72", "80",
+      Q("¿Cuál es el antónimo de \"Grande\"?", ["Pequeño", "Largo", "Fuerte", "Viejo",
+      Q("¿Cuál es el órgano más grande del cuerpo?", ["Corazón", "Pulmón", "Hígado", "Cerebro",
+      Q("¿Cuántos océanos hay en el mundo?", ["3", "4", "5", "6"], "5", "soc")
+    ], "Hígado", "cien")
+    ], "Pequeño", "leng")
+    ], "64", "mate")
+    ], "90", "mate"),
       Q("Ordena la secuencia de una competencia: Calentamiento, Competencia, Premiación. ¿Qué va primero?", ["Calentamiento", "Competencia", "Premiación", "Ninguna"], "Calentamiento", "leng"),
       Q("¿Qué país asocias con la tradición del caballo de paso fino?", ["Colombia", "Rusia", "Egipto", "Canadá"], "Colombia", "soc"),
       Q("Si tu puntaje inicial es 100 y pierdes 5 puntos por cada error, con 3 errores ¿cuál es tu puntaje?", ["80", "85", "90", "95"], "85", "mate"),
@@ -820,6 +1075,10 @@ const DAYS = [
     ],
     englishVocab: [
       { w: "Score", es: "Puntaje", e: "📊" },
+      { w: "Learn", es: "Aprender", e: "📚" },
+      { w: "Teach", es: "Enseñar", e: "👩‍🏫" },
+      { w: "Run", es: "Correr", e: "🏃" },
+      { w: "Love", es: "Amor", e: "❤️" },
       { w: "Warm-up", es: "Calentamiento", e: "🔥" },
       { w: "Medal", es: "Medalla", e: "🥇" },
       { w: "Winner", es: "Ganador", e: "🏆" },
@@ -840,6 +1099,8 @@ const DAYS = [
     ],
     englishDialogue: [
       { t: "And she jumps! Great time!", es: "¡Y ella salta! ¡Excelente tiempo!" },
+      { t: "Yes, I love them!", es: "¡Sí, me encanta!" },
+      { t: "Do you like horses?", es: "¿Te gustan los caballos?" },
       { t: "She wins the gold medal!", es: "¡Ella gana la medalla de oro!" },
       { t: "I feel nervous but ready.", es: "Me siento nerviosa pero lista." },
       { t: "Your effort will show in the result!", es: "¡Tu esfuerzo se verá en el resultado!" },
@@ -859,7 +1120,15 @@ const DAYS = [
     intro: "Última semana antes del Gran Concurso. ¡Repasemos todo lo aprendido en matemáticas!",
     isShowDay: false,
     subjectQuestions: [
-      Q("Un caballo recorre 5 km por hora. ¿Cuántos km recorre en 3 horas?", ["10", "15", "20", "8"], "15", "mate"),
+      Q("Un caballo recorre 5 km por hora. ¿Cuántos km recorre en 3 horas?", ["10", "15", "20", "8",
+      Q("¿Cuál es la mitad de 100?", ["40", "50", "60", "70",
+      Q("¿Cuál es el sinónimo de \"Feliz\"?", ["Contento", "Triste", "Enojado", "Cansado",
+      Q("¿Qué gas respiramos para vivir?", ["Oxígeno", "Nitrógeno", "Dióxido de carbono", "Helio",
+      Q("¿En qué continente está Colombia?", ["Europa", "Asia", "América", "África"], "América", "soc")
+    ], "Oxígeno", "cien")
+    ], "Contento", "leng")
+    ], "50", "mate")
+    ], "15", "mate"),
       Q("¿Cuál es el perímetro de un corral cuadrado de lado 4 m?", ["8", "12", "16", "20"], "16", "mate"),
       Q("3/4 + 1/4 = ?", ["1 (un entero)", "4/8", "2/4", "0"], "1 (un entero)", "mate"),
       Q("¿Cuánto es 9 x 7?", ["56", "63", "72", "54"], "63", "mate"),
@@ -868,6 +1137,10 @@ const DAYS = [
     ],
     englishVocab: [
       { w: "Distance", es: "Distancia", e: "📏" },
+      { w: "Learn", es: "Aprender", e: "📚" },
+      { w: "Teach", es: "Enseñar", e: "👩‍🏫" },
+      { w: "Run", es: "Correr", e: "🏃" },
+      { w: "Love", es: "Amor", e: "❤️" },
       { w: "Hour", es: "Hora", e: "🕐" },
       { w: "Fraction", es: "Fracción", e: "🍰" },
       { w: "Perimeter", es: "Perímetro", e: "🔲" },
@@ -888,6 +1161,8 @@ const DAYS = [
     ],
     englishDialogue: [
       { t: "How far did we ride today?", es: "¿Qué distancia cabalgamos hoy?" },
+      { t: "Yes, I love them!", es: "¡Sí, me encanta!" },
+      { t: "Do you like horses?", es: "¿Te gustan los caballos?" },
       { t: "Fifteen kilometers in three hours!", es: "¡Quince kilómetros en tres horas!" },
       { t: "Let's multiply the numbers.", es: "Multipliquemos los números." },
       { t: "Great, now we have the total!", es: "¡Genial, ya tenemos el total!" },
@@ -905,7 +1180,15 @@ const DAYS = [
     intro: "Vamos a escribir la crónica de todo el verano de Miranda en el rancho.",
     isShowDay: false,
     subjectQuestions: [
-      Q("¿Qué tipo de texto usarías para contar tu verano en el rancho?", ["Narrativo", "Instructivo", "Solo números", "Ninguno"], "Narrativo", "leng"),
+      Q("¿Qué tipo de texto usarías para contar tu verano en el rancho?", ["Narrativo", "Instructivo", "Solo números", "Ninguno",
+      Q("¿Cuál es el doble de 25?", ["40", "50", "60", "70",
+      Q("¿Cuál es el plural de caballo?", ["Caballos", "Caballoes", "Caballoz", "Caballí",
+      Q("¿Cuál es el color de la sangre?", ["Rojo", "Azul", "Verde", "Amarillo",
+      Q("¿Cuántos continentes hay?", ["5", "6", "7", "8"], "7", "soc")
+    ], "Rojo", "cien")
+    ], "Caballos", "leng")
+    ], "50", "mate")
+    ], "Narrativo", "leng"),
       Q("¿Cuál es un sinónimo de 'feliz'?", ["Contento", "Triste", "Enojado", "Cansado"], "Contento", "leng"),
       Q("¿Qué signo se usa al inicio y al final de una pregunta en español?", ["¿ y ?", ". y ,", ", y ;", "Ninguno"], "¿ y ?", "leng"),
       Q("¿Qué es una crónica?", ["Un relato de hechos en orden de tiempo", "Una poesía sin sentido", "Un número", "Un dibujo"], "Un relato de hechos en orden de tiempo", "leng"),
@@ -914,6 +1197,10 @@ const DAYS = [
     ],
     englishVocab: [
       { w: "Summer", es: "Verano", e: "☀️" },
+      { w: "Learn", es: "Aprender", e: "📚" },
+      { w: "Teach", es: "Enseñar", e: "👩‍🏫" },
+      { w: "Run", es: "Correr", e: "🏃" },
+      { w: "Love", es: "Amor", e: "❤️" },
       { w: "Chronicle", es: "Crónica", e: "📰" },
       { w: "Happy", es: "Feliz", e: "😄" },
       { w: "Adventure", es: "Aventura", e: "🗺️" },
@@ -934,6 +1221,8 @@ const DAYS = [
     ],
     englishDialogue: [
       { t: "How was your summer?", es: "¿Cómo fue tu verano?" },
+      { t: "Yes, I love them!", es: "¡Sí, me encanta!" },
+      { t: "Do you like horses?", es: "¿Te gustan los caballos?" },
       { t: "It was a wonderful adventure!", es: "¡Fue una aventura maravillosa!" },
       { t: "What is your favorite memory?", es: "¿Cuál es tu recuerdo favorito?" },
       { t: "Riding Luna for the first time!", es: "¡Montar a Luna por primera vez!" },
@@ -951,7 +1240,15 @@ const DAYS = [
     intro: "Creemos un afiche con todo lo que aprendimos sobre el cuidado de los caballos.",
     isShowDay: false,
     subjectQuestions: [
-      Q("¿Qué necesita un caballo para estar sano?", ["Agua, alimento y cuidado", "Solo agua", "Solo compañía", "Nada"], "Agua, alimento y cuidado", "cien"),
+      Q("¿Qué necesita un caballo para estar sano?", ["Agua, alimento y cuidado", "Solo agua", "Solo compañía", "Nada",
+      Q("Si compras 3 manzanas a 5 pesos cada una, ¿cuánto gastas?", ["12", "15", "18", "20",
+      Q("¿Qué tipo de palabra es \"Correr\"?", ["Verbo", "Sustantivo", "Adjetivo", "Preposición",
+      Q("¿Cuántos sentidos tiene el ser humano?", ["3", "4", "5", "6",
+      Q("¿Cuál es la capital de Colombia?", ["Medellín", "Bogotá", "Cali", "Barranquilla"], "Bogotá", "soc")
+    ], "5", "cien")
+    ], "Verbo", "leng")
+    ], "15", "mate")
+    ], "Agua, alimento y cuidado", "cien"),
       Q("¿Qué parte del cuerpo usa el caballo para caminar?", ["Las patas y cascos", "Las orejas", "Los ojos", "La cola"], "Las patas y cascos", "cien"),
       Q("El agua de lluvia llega al bebedero gracias a...", ["El ciclo del agua", "La magia", "El viento solo", "Nada"], "El ciclo del agua", "cien"),
       Q("¿Qué grupo de seres vivos NO puede fabricar su propio alimento?", ["Los animales", "Las plantas", "Ambos pueden", "Ninguno"], "Los animales", "cien"),
@@ -960,6 +1257,10 @@ const DAYS = [
     ],
     englishVocab: [
       { w: "Healthy", es: "Sano", e: "💪" },
+      { w: "Learn", es: "Aprender", e: "📚" },
+      { w: "Teach", es: "Enseñar", e: "👩‍🏫" },
+      { w: "Run", es: "Correr", e: "🏃" },
+      { w: "Love", es: "Amor", e: "❤️" },
       { w: "Care", es: "Cuidado", e: "❤️" },
       { w: "Poster", es: "Afiche", e: "🖼️" },
       { w: "Body", es: "Cuerpo", e: "🐴" },
@@ -980,6 +1281,8 @@ const DAYS = [
     ],
     englishDialogue: [
       { t: "How do we keep the horse healthy?", es: "¿Cómo mantenemos sano al caballo?" },
+      { t: "Yes, I love them!", es: "¡Sí, me encanta!" },
+      { t: "Do you like horses?", es: "¿Te gustan los caballos?" },
       { t: "With water, food and lots of care!", es: "¡Con agua, comida y mucho cuidado!" },
       { t: "Horses need daily exercise.", es: "Los caballos necesitan ejercicio diario." },
       { t: "Just like us, to stay healthy!", es: "¡Igual que nosotros, para estar sanos!" },
@@ -997,7 +1300,15 @@ const DAYS = [
     intro: "Presentemos el rancho completo: su mapa, su gente y su cultura.",
     isShowDay: false,
     subjectQuestions: [
-      Q("¿Qué región de Colombia es famosa por la ganadería y los llanos?", ["Los Llanos Orientales", "La Amazonía profunda", "El desierto", "Ninguna"], "Los Llanos Orientales", "soc"),
+      Q("¿Qué región de Colombia es famosa por la ganadería y los llanos?", ["Los Llanos Orientales", "La Amazonía profunda", "El desierto", "Ninguna",
+      Q("¿Cuánto es 8 × 8?", ["56", "64", "72", "80",
+      Q("¿Cuál es el antónimo de \"Grande\"?", ["Pequeño", "Largo", "Fuerte", "Viejo",
+      Q("¿Cuál es el órgano más grande del cuerpo?", ["Corazón", "Pulmón", "Hígado", "Cerebro",
+      Q("¿Cuántos océanos hay en el mundo?", ["3", "4", "5", "6"], "5", "soc")
+    ], "Hígado", "cien")
+    ], "Pequeño", "leng")
+    ], "64", "mate")
+    ], "Los Llanos Orientales", "soc"),
       Q("Un mapa nos ayuda a...", ["Ubicarnos y encontrar rutas", "Cocinar", "Dormir", "Nada"], "Ubicarnos y encontrar rutas", "soc"),
       Q("El polo y el dressage son ejemplos de...", ["Deportes ecuestres", "Comidas típicas", "Animales", "Instrumentos"], "Deportes ecuestres", "soc"),
       Q("¿Qué es la cultura de un lugar?", ["Sus costumbres, comida, música y tradiciones", "Solo su clima", "Solo su idioma", "Nada"], "Sus costumbres, comida, música y tradiciones", "soc"),
@@ -1006,6 +1317,10 @@ const DAYS = [
     ],
     englishVocab: [
       { w: "Region", es: "Región", e: "🗺️" },
+      { w: "Learn", es: "Aprender", e: "📚" },
+      { w: "Teach", es: "Enseñar", e: "👩‍🏫" },
+      { w: "Run", es: "Correr", e: "🏃" },
+      { w: "Love", es: "Amor", e: "❤️" },
       { w: "Culture", es: "Cultura", e: "🎭" },
       { w: "World", es: "Mundo", e: "🌎" },
       { w: "Tradition", es: "Tradición", e: "🎉" },
@@ -1026,6 +1341,8 @@ const DAYS = [
     ],
     englishDialogue: [
       { t: "Tell me about your ranch.", es: "Cuéntame sobre tu rancho." },
+      { t: "Yes, I love them!", es: "¡Sí, me encanta!" },
+      { t: "Do you like horses?", es: "¿Te gustan los caballos?" },
       { t: "It has a map, a river and lots of tradition!", es: "¡Tiene un mapa, un río y mucha tradición!" },
       { t: "Our ranch community is diverse.", es: "Nuestra comunidad del rancho es diversa." },
       { t: "Let's celebrate all our traditions!", es: "¡Celebremos todas nuestras tradiciones!" },
@@ -1042,7 +1359,15 @@ const DAYS = [
     date: "Viernes 31 de julio", title: "🏆 Gran Concurso de Verano", subjectLabel: "Evento final", isShowDay: true, isFinal: true,
     intro: "¡Es el gran día! Miranda compite en el Gran Concurso de Verano usando todo lo aprendido en julio.",
     subjectQuestions: [
-      Q("Un corral mide 6 m x 4 m. ¿Cuál es su área?", ["24", "20", "10", "28"], "24", "mate"),
+      Q("Un corral mide 6 m x 4 m. ¿Cuál es su área?", ["24", "20", "10", "28",
+      Q("¿Cuál es la mitad de 100?", ["40", "50", "60", "70",
+      Q("¿Cuál es el sinónimo de \"Feliz\"?", ["Contento", "Triste", "Enojado", "Cansado",
+      Q("¿Qué gas respiramos para vivir?", ["Oxígeno", "Nitrógeno", "Dióxido de carbono", "Helio",
+      Q("¿En qué continente está Colombia?", ["Europa", "Asia", "América", "África"], "América", "soc")
+    ], "Oxígeno", "cien")
+    ], "Contento", "leng")
+    ], "50", "mate")
+    ], "24", "mate"),
       Q("¿Cuál es la moraleja típica de las fábulas?", ["Enseñar un valor o lección", "Dar risa nada más", "No tiene sentido", "Ninguna"], "Enseñar un valor o lección", "leng"),
       Q("¿Qué necesita todo ser vivo para vivir?", ["Agua, alimento y aire", "Solo dinero", "Nada", "Solo juguetes"], "Agua, alimento y aire", "cien"),
       Q("¿Qué representan los puntos cardinales en un mapa?", ["Las direcciones norte, sur, este y oeste", "Los colores", "Los números", "Nada"], "Las direcciones norte, sur, este y oeste", "soc"),
@@ -1053,6 +1378,10 @@ const DAYS = [
     ],
     englishVocab: [
       { w: "Grand Prix", es: "Gran Premio", e: "🏆" },
+      { w: "Learn", es: "Aprender", e: "📚" },
+      { w: "Teach", es: "Enseñar", e: "👩‍🏫" },
+      { w: "Run", es: "Correr", e: "🏃" },
+      { w: "Love", es: "Amor", e: "❤️" },
       { w: "Champion", es: "Campeona", e: "👑" },
       { w: "Congratulations", es: "Felicitaciones", e: "🎉" },
       { w: "Proud", es: "Orgullosa", e: "🥰" },
@@ -1073,6 +1402,8 @@ const DAYS = [
     ],
     englishDialogue: [
       { t: "Welcome to the Summer Grand Prix!", es: "¡Bienvenidos al Gran Premio de Verano!" },
+      { t: "Yes, I love them!", es: "¡Sí, me encanta!" },
+      { t: "Do you like horses?", es: "¿Te gustan los caballos?" },
       { t: "Miranda is ready to jump!", es: "¡Miranda está lista para saltar!" },
       { t: "And she wins the gold medal! Congratulations!", es: "¡Y gana la medalla de oro! ¡Felicitaciones!" },
       { t: "What an amazing journey this summer!", es: "¡Qué recorrido tan increíble este verano!" },

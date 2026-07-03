@@ -135,12 +135,13 @@ function buildListeningQuestions(vocabList, lang) {
    reutilizarlas pasando el progreso de otro usuario en modo solo lectura. */
 function dayMaxScore(day) {
   // Warm-up: hasta 20 puntos
-  // Materia: 6 preguntas × 10 puntos
-  // English: 3 listening × 5 puntos
-  // Français: 3 listening × 5 puntos
+  // Materia: 10 preguntas × 10 puntos = 100 puntos
+  // English: 4 listening × 5 puntos = 20 puntos
+  // Français: 4 listening × 5 puntos = 20 puntos
   // Challenge: 20 puntos
   // Journal: 10 puntos
-  return 20 + day.subjectQuestions.length * 10 + 3 * 5 + 3 * 5 + 20 + 10;
+  // Total: ~190 puntos (2 horas de contenido)
+  return 20 + day.subjectQuestions.length * 10 + 4 * 5 + 4 * 5 + 20 + 10;
 }
 function totalHerraduras(state = STATE) {
   return Object.values(state.completedDays).reduce((s, d) => s + d.score, 0);
