@@ -379,7 +379,8 @@ async function renderTasks() {
   wireTaskToggles(data);
 }
 function buildTasksHTML(data, interactive) {
-  const activeTasks = data.tasks.filter((t) => t.active);
+  const todayIdx = SESSION ? SESSION.idx : 0;
+  const activeTasks = data.tasks.filter((t) => t.active && (t.dayIndex === todayIdx || t.dayIndex === undefined));
   const doneCount = data.completedToday ? data.completedToday.length : 0;
   // Si una tarea se completó hoy y luego el padre la pausó, "total" (solo
   // activas) podría quedar menor que "hechas" -- lo ajustamos solo para

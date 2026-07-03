@@ -90,7 +90,10 @@ async function renderTasksManageBlock(container, email) {
     <div class="card">
       <h3>+ Nueva tarea</h3>
       <input id="ntEmoji" class="ios-input" style="width:56px; text-align:center; display:inline-block; vertical-align:top;" maxlength="2" value="📌" />
-      <input id="ntTitle" class="ios-input" style="width:calc(100% - 68px); text-align:left; display:inline-block; margin-left:6px;" placeholder="Ej: Cepillarse los dientes" maxlength="60" />
+      <input id="ntTitle" class="ios-input" style="width:calc(100% - 140px); text-align:left; display:inline-block; margin-left:6px;" placeholder="Ej: Cepillarse los dientes" maxlength="60" />
+      <select id="ntDay" class="ios-input" style="width:100%; margin-top:8px; display:block;">
+        ${DAYS.map((d, i) => `<option value="${i}">Día ${i + 1}: ${d.title}</option>`).join("")}
+      </select>
       <div id="ntError" class="feedback" style="color:#C22A20;"></div>
       <button class="btn btn-primary small" id="ntSubmit">Agregar tarea</button>
     </div>
@@ -98,7 +101,10 @@ async function renderTasksManageBlock(container, email) {
       ${data.tasks.length === 0 ? `<div class="ios-row ios-row-static"><span class="muted">Todavía no hay tareas asignadas</span></div>` : ""}
       ${data.tasks.map((t) => `
         <div class="ios-row ios-row-static" style="align-items:center;">
-          <span>${t.active ? "" : "⏸ "}${t.emoji} ${t.title}</span>
+          <div>
+            <span>${t.active ? "" : "⏸ "}${t.emoji} ${t.title}</span>
+            ${typeof t.dayIndex === "number" ? `<div class="muted small">Día ${t.dayIndex + 1}: ${DAYS[t.dayIndex] ? DAYS[t.dayIndex].title : ""}</div>` : ""}
+          </div>
           <span>
             <button class="btn tiny" data-action="toggle" data-id="${t.id}" data-active="${t.active}">${t.active ? "Pausar" : "Reanudar"}</button>
             <button class="btn tiny" style="color:var(--red);" data-action="delete" data-id="${t.id}">Eliminar</button>
@@ -123,11 +129,12 @@ async function renderTasksManageBlock(container, email) {
   container.querySelector("#ntSubmit").addEventListener("click", async () => {
     const emoji = container.querySelector("#ntEmoji").value.trim() || "📌";
     const title = container.querySelector("#ntTitle").value.trim();
+    const dayIndex = Number(container.querySelector("#ntDay").value) || 0;
     const errBox = container.querySelector("#ntError");
     errBox.textContent = "";
     if (!title) { errBox.textContent = "Escribe el nombre de la tarea."; return; }
     try {
-      await apiFetch("/api/tasks/manage/" + encodeURIComponent(email), { method: "POST", body: JSON.stringify({ title, emoji }) });
+      await apiFetch("/api/tasks/manage/" + encodeURIComponent(email), { method: "POST", body: JSON.stringify({ title, emoji, dayIndex }) });
       renderTasksManageBlock(container, email);
     } catch (e) {
       errBox.textContent = e.message;

@@ -395,15 +395,17 @@ async function handleManageCreateTask(req, res, email) {
   try { body = await readBody(req); } catch (e) { return sendJson(res, 400, { ok: false, error: "JSON inválido" }); }
   const title = (body.title || "").toString().trim().slice(0, 60);
   const emoji = (body.emoji || "📌").toString().trim().slice(0, 4) || "📌";
+  const dayIndex = Number(body.dayIndex) || 0; // Día asignado (0-22), por defecto día actual
   if (!title) return sendJson(res, 400, { ok: false, error: "Falta el título de la tarea" });
+  if (dayIndex < 0 || dayIndex > 22) return sendJson(res, 400, { ok: false, error: "Día inválido (0-22)" });
   const data = getChildTaskData(email);
   if (data.tasks.filter((t) => t.active).length >= 20) {
     return sendJson(res, 400, { ok: false, error: "Ya hay 20 tareas activas, elimina alguna antes de agregar más." });
   }
-  const task = { id: crypto.randomBytes(6).toString("hex"), title, emoji, active: true, createdAt: new Date().toISOString() };
+  const task = { id: crypto.randomBytes(6).toString("hex"), title, emoji, active: true, dayIndex, createdAt: new Date().toISOString() };
   data.tasks.push(task);
   saveTasks();
-  auditLog("task_created", { actor: actor.email, target: email, taskId: task.id, title }, req);
+  auditLog("task_created", { actor: actor.email, target: email, taskId: task.id, title, dayIndex }, req);
   sendJson(res, 200, { ok: true, ...buildTasksResponse(email) });
 }
 async function handleManageUpdateTask(req, res, email, taskId) {
