@@ -1,0 +1,71 @@
+# ============================================================
+# Stable Stars - configuración de nginx (reverse proxy + TLS)
+#
+# Reemplaza TU_DOMINIO.com por tu dominio real, copia este archivo a
+# /etc/nginx/sites-available/stable-stars, y sigue los pasos de DEPLOYMENT.md
+# para emitir el certificado con certbot antes de activarlo.
+# ============================================================
+
+# Zona de rate-limit específica para el login (defensa adicional a la que ya
+# tiene la app en Node — esto frena la petición ANTES de que llegue a Node).
+limit_req_zone $binary_remote_addr zone=login_zone:10m rate=10r/m;
+limit_req_zone $binary_remote_addr zone=api_zone:10m rate=2r/s;
+
+# ---- Redirección HTTP -> HTTPS ----
+server {
+    listen 80;
+    listen [::]:80;
+    server_name TU_DOMINIO.com www.TU_DOMINIO.com;
+
+    # Requerido por certbot para renovar el certificado (método webroot/HTTP-01)
+    location /.well-known/acme-challenge/ {
+        root /var/www/certbot;
+    }
+
+    location / {
+        return 301 https://$host$request_uri;
+    }
+}
+
+# ---- Sitio real, con TLS ----
+server {
+    listen 443 ssl http2;
+    listen [::]:443 ssl http2;
+    server_name TU_DOMINIO.com www.TU_DOMINIO.com;
+
+    # Rutas típicas de certbot (se generan solas al pedir el certificado)
+    ssl_certificate     /etc/letsencrypt/live/TU_DOMINIO.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/TU_DOMINIO.com/privkey.pem;
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers off;
+    ssl_session_cache shared:SSL:10m;
+    ssl_session_timeout 1d;
+
+    # Defensa en profundidad: la app en Node ya manda estas cabeceras, pero
+    # así quedan también en respuestas de error que nginx genera directamente.
+    add_header X-Content-Type-Options nosniff always;
+    add_header X-Frame-Options DENY always;
+    add_header Referrer-Policy strict-origin-when-cross-origin always;
+    add_header Strict-Transport-Security "max-age=15552000; includeSubDomains" always;
+
+    client_max_body_size 1m;   # la app no recibe archivos grandes
+    server_tokens off;         # no anunciar la versión de nginx
+
+    # Límite extra sobre el login, antes de llegar a la app
+    location = /api/auth/login {
+        limit_req zone=login_zone burst=5 nodelay;
+        proxy_pass http://127.0.0.1:5183;
+        include /etc/nginx/proxy_params_stablestars;
+    }
+
+    location /api/ {
+        limit_req zone=api_zone burst=20 nodelay;
+        proxy_pass http://127.0.0.1:5183;
+        include /etc/nginx/proxy_params_stablestars;
+    }
+
+    location / {
+        proxy_pass http://127.0.0.1:5183;
+        include /etc/nginx/proxy_params_stablestars;
+    }
+}

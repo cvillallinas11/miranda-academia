@@ -1,0 +1,26 @@
+# Stable Stars - despliegue en el VPS
+#
+# El contenedor SOLO se publica en 127.0.0.1 (no en 0.0.0.0): nginx en el
+# propio VPS es la única puerta de entrada pública, con TLS y cabeceras.
+# Nadie puede llegarle al puerto 5183 directo desde internet.
+
+services:
+  app:
+    build: .
+    image: stable-stars:latest
+    container_name: stable-stars
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      - HOST=0.0.0.0
+      - PORT=5183
+    ports:
+      - "127.0.0.1:5183:5183"
+    volumes:
+      - ./data:/app/data
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"

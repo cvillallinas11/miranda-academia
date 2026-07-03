@@ -1,0 +1,104 @@
+# ============================================================
+# Stable Stars - CI/CD en cascada con autorización manual
+#
+# Nota sobre el diseño: GitHub solo permite el gate de "Required reviewers"
+# en environments de repos PRIVADOS con plan de pago (GitHub Pro/Team). Este
+# repo es privado en plan gratuito, así que la autorización se implementa
+# con "workflow_dispatch": el despliegue NUNCA ocurre solo, solo cuando un
+# humano entra a la pestaña Actions y hace clic en "Run workflow". Si en
+# algún momento pasas a GitHub Pro, puedes activar además "Required
+# reviewers" en Settings -> Environments -> production para pedir además
+# una aprobación explícita dentro del propio job (ver DEPLOYMENT.md).
+#
+# El job "deploy" corre en un RUNNER AUTOHOSPEDADO instalado en el propio
+# VPS (no en la nube de GitHub) -- el firewall de infraestructura de
+# Hostinger bloquea las IPs de los runners de GitHub, así que en vez de
+# conectarnos por SSH desde afuera, el runner vive en el VPS y ejecuta el
+# despliegue localmente cuando se dispara. Ver DEPLOYMENT.md.
+#
+# Flujo:
+#   1) Push a "main": SOLO corre "verify" (feedback automático, no toca el VPS)
+#   2) Para desplegar de verdad: pestaña Actions -> "Run workflow" (manual)
+#   3) Eso dispara "verify" + "deploy" -> el runner del VPS corre deploy.sh
+# ============================================================
+name: Deploy Stable Stars
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+jobs:
+  verify:
+    name: Verificar código
+    runs-on: ubuntu-latest
+    steps:
+      - name: Descargar el código
+        uses: actions/checkout@v4
+
+      - name: Configurar Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Chequeo de sintaxis
+        run: |
+          for f in app.js auth.js data.js portal.js serve.js; do
+            echo "Verificando $f"
+            node --check "$f"
+          done
+
+      - name: Levantar el servidor y probarlo (smoke test)
+        run: |
+          ADMIN_EMAIL=ci@example.com ADMIN_PASSWORD=ci-test-password-123 PORT=5199 HOST=127.0.0.1 node serve.js &
+          SERVER_PID=$!
+          sleep 2
+
+          echo "La app debe responder en /"
+          curl -fsS http://127.0.0.1:5199/ > /dev/null
+
+          echo "Login sin credenciales debe rechazarse"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" -X POST http://127.0.0.1:5199/api/auth/login \
+            -H "Content-Type: application/json" -d '{"email":"nadie@example.com","password":"x"}')
+          test "$STATUS" = "401"
+
+          echo "Tareas sin sesión deben rechazarse"
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" http://127.0.0.1:5199/api/tasks)
+          test "$STATUS" = "401"
+
+          echo "Archivos sensibles NO deben ser accesibles por HTTP (regresión de seguridad)"
+          curl -fsS http://127.0.0.1:5199/serve.js > /dev/null && exit 1 || echo "OK: /serve.js sigue bloqueado"
+          curl -fsS http://127.0.0.1:5199/.env > /dev/null && exit 1 || echo "OK: /.env sigue bloqueado"
+          curl -fsS http://127.0.0.1:5199/data/users.json > /dev/null && exit 1 || echo "OK: /data/users.json sigue bloqueado"
+
+          kill $SERVER_PID
+
+  deploy:
+    name: Desplegar a producción
+    needs: verify
+    # Runner autohospedado registrado en el VPS (ver DEPLOYMENT.md) -- no es
+    # un servidor de GitHub, es un proceso corriendo en tu propia máquina.
+    runs-on: [self-hosted, vps]
+    # === Aquí vive la "autorización en cascada" (versión gratuita) ===
+    # Este job SOLO se ejecuta cuando alguien lo dispara a mano desde la
+    # pestaña Actions ("Run workflow"). Un push normal a main jamás llega
+    # hasta aquí por sí solo — ver la nota de licencia arriba.
+    if: github.event_name == 'workflow_dispatch'
+    environment:
+      name: production
+      url: https://miranda.vortex-company.tech
+    steps:
+      # No usamos actions/checkout aquí a propósito: el runner autohospedado
+      # clonaría el repo en su propio directorio de trabajo (_work/...), que
+      # NO es /opt/apps/stable-stars (la carpeta real que ya tiene el .env,
+      # el volumen de datos y a la que apunta nginx). deploy.sh vive DENTRO
+      # de esa carpeta real y ya hace su propio "git fetch/reset" ahí mismo.
+      - name: Ejecutar el despliegue
+        run: |
+          cd /opt/apps/stable-stars
+          chmod +x deploy/deploy.sh
+          ./deploy/deploy.sh

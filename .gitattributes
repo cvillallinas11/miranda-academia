@@ -1,0 +1,5 @@
+# Fuerza saltos de línea estilo Unix (LF) en el repositorio, sin importar el
+# sistema operativo desde el que se haga commit. Es crítico para los scripts
+# .sh: con CRLF fallan al ejecutarse en el VPS Linux ("bad interpreter").
+* text=auto eol=lf
+*.sh text eol=lf

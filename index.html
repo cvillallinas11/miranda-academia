@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Stable Stars · La Academia de Miranda</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="topbar-brand">🐴 <span>Stable Stars</span></div>
+      <div class="hero-stats">
+        <span id="heroHerraduras" class="chip chip-tint">🧲 0</span>
+        <span id="heroLevel" class="chip chip-gold">🐴 Potrillo</span>
+      </div>
+    </header>
+
+    <main id="view"></main>
+
+    <!-- El contenido de esta barra lo arma en JS app.js (rol niño) o portal.js (rol admin/padre) -->
+    <nav class="tabbar" id="tabbar"></nav>
+  </div>
+
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+  <script src="portal.js"></script>
+  <script src="auth.js"></script>
+</body>
+</html>
