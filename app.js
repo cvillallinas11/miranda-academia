@@ -134,7 +134,13 @@ function buildListeningQuestions(vocabList, lang) {
    que tiene la sesión activa) para que el panel de padres/admin pueda
    reutilizarlas pasando el progreso de otro usuario en modo solo lectura. */
 function dayMaxScore(day) {
-  return day.subjectQuestions.length * 10 + 3 * 5 + 3 * 5 + 20 + 10;
+  // Warm-up: hasta 20 puntos
+  // Materia: 6 preguntas × 10 puntos
+  // English: 3 listening × 5 puntos
+  // Français: 3 listening × 5 puntos
+  // Challenge: 20 puntos
+  // Journal: 10 puntos
+  return 20 + day.subjectQuestions.length * 10 + 3 * 5 + 3 * 5 + 20 + 10;
 }
 function totalHerraduras(state = STATE) {
   return Object.values(state.completedDays).reduce((s, d) => s + d.score, 0);
@@ -518,23 +524,95 @@ function renderDaySession(idx) {
 }
 
 function sessionProgressBar() {
-  const steps = ["Inicio", "Materia", "English", "Français", "Desafío", "Diario", "Resumen"];
+  const steps = ["Calentamiento", "Inicio", "Materia", "English", "Français", "Desafío", "Diario", "Resumen"];
   return `<div class="steps">${steps.map((s, i) => `<span class="step ${i === SESSION.step ? "on" : ""} ${i < SESSION.step ? "done" : ""}">${s}</span>`).join("")}</div>`;
 }
 
 function renderStep() {
   const day = SESSION.day;
   switch (SESSION.step) {
-    case 0: return renderIntroStep(day);
-    case 1: return renderQuizStep(day);
-    case 2: return renderLangStep(day, "en");
-    case 3: return renderLangStep(day, "fr");
-    case 4: return renderChallengeStep(day);
-    case 5: return renderJournalStep(day);
-    case 6: return renderSummaryStep(day);
+    case 0: return renderWarmupStep(day);
+    case 1: return renderIntroStep(day);
+    case 2: return renderQuizStep(day);
+    case 3: return renderLangStep(day, "en");
+    case 4: return renderLangStep(day, "fr");
+    case 5: return renderChallengeStep(day);
+    case 6: return renderJournalStep(day);
+    case 7: return renderSummaryStep(day);
   }
 }
 function nextStep() { SESSION.step++; renderStep(); }
+
+function renderWarmupStep(day) {
+  const prevIdx = SESSION.idx - 1;
+  const prevDay = prevIdx >= 0 ? DAYS[prevIdx] : null;
+
+  if (!prevDay) {
+    view.innerHTML = `
+      ${sessionProgressBar()}
+      <div class="card session-card">
+        <div class="session-tag">🔥 Calentamiento</div>
+        <h3>Bienvenida a la Academia de Miranda</h3>
+        <p>Hoy es tu primer día. Vamos a empezar con una introducción rápida sobre el rancho y los caballos.</p>
+        <div class="warmup-facts">
+          <div class="fact">🐴 <strong>Los caballos</strong> pueden alcanzar velocidades de hasta 88 km/h</div>
+          <div class="fact">🏇 <strong>Los jinetes</strong> aprenden técnicas que toman años de práctica</div>
+          <div class="fact">💪 <strong>El entrenamiento</strong> requiere dedicación y paciencia</div>
+        </div>
+        <button class="btn btn-primary big" id="continueBtn">Continuar 🐴</button>
+      </div>
+    `;
+    view.querySelector("#continueBtn").addEventListener("click", nextStep);
+    return;
+  }
+
+  let currentMatching = 0;
+  const prevVocabEn = prevDay.englishVocab.slice(0, 4);
+  const matchingPairs = prevVocabEn.map(v => ({ en: v.w, es: v.es }));
+  const shuffledEs = shuffle(matchingPairs.map(p => p.es));
+  let matchedPairs = 0;
+
+  function drawMatching() {
+    const maxMatches = matchingPairs.length;
+    view.innerHTML = `
+      ${sessionProgressBar()}
+      <div class="card session-card">
+        <div class="session-tag">🔥 Calentamiento · Repaso del vocabulario anterior</div>
+        <h3>Empareja las palabras (${matchedPairs}/${maxMatches} correctas)</h3>
+        <div class="matching-container">
+          <div class="matching-left">
+            ${prevVocabEn.map((v, i) => `
+              <div class="match-item" data-en="${i}">
+                <span class="match-label">${v.w}</span>
+              </div>
+            `).join("")}
+          </div>
+          <div class="matching-right">
+            ${shuffledEs.map((es, i) => `
+              <div class="match-item" data-es="${matchingPairs.findIndex(p => p.es === es)}">
+                <span class="match-label">${es}</span>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+        <button class="btn btn-primary" id="matchDoneBtn" ${matchedPairs === maxMatches ? "" : "disabled"}>Siguiente 🐎</button>
+      </div>
+    `;
+
+    view.querySelectorAll(".match-item").forEach(item => {
+      item.addEventListener("click", function() {
+        this.classList.toggle("selected");
+      });
+    });
+
+    view.querySelector("#matchDoneBtn").addEventListener("click", () => {
+      SESSION.score += Math.min(matchedPairs * 5, 20);
+      nextStep();
+    });
+  }
+
+  drawMatching();
+}
 
 function renderIntroStep(day) {
   view.innerHTML = `
