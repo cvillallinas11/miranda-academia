@@ -25,7 +25,9 @@ const DAYS = [
     intro: "¡Hola! Hoy Miranda llega por primera vez al rancho y elige a su caballo. Vamos a conocernos y a ver qué tanto sabemos.",
     isShowDay: false,
     subjectQuestions: [
-      Q("¿Cuánto es 8 + 5?", ["12", "13", "14", "15"], "13", "mate"),
+      Q("¿Cuánto es 8 + 5?", ["12", "13", "14", "15",
+      Q("¿En qué continente está Colombia?", ["América del Sur", "América Central", "África", "Europa"], "América del Sur", "soc")
+    ], "13", "mate"),
       Q("¿Cuál de estas palabras es un sustantivo?", ["Caballo", "Correr", "Rápido", "Y"], "Caballo", "leng"),
       Q("¿Qué necesita todo ser vivo para sobrevivir?", ["Agua y alimento", "Solo dinero", "Solo aire", "Nada"], "Agua y alimento", "cien"),
       Q("¿Cuánto es 15 - 7?", ["6", "7", "8", "9"], "8", "mate"),
@@ -118,7 +120,9 @@ const DAYS = [
     date: "Viernes 3 de julio", title: "Concurso de Bienvenida", subjectLabel: "Repaso mixto", isShowDay: true,
     intro: "¡Primer Concurso Hípico del verano! Repasemos un poco de todo lo que hemos visto esta semana.",
     subjectQuestions: [
-      Q("Si el sol sale por el este, ¿por dónde se oculta?", ["Oeste", "Norte", "Sur", "Centro"], "Oeste", "soc"),
+      Q("Si el sol sale por el este, ¿por dónde se oculta?", ["Oeste", "Norte", "Sur", "Centro",
+      Q("¿Cuál es la capital de Colombia?", ["Medellín", "Bogotá", "Cali", "Barranquilla"], "Bogotá", "soc")
+    ], "Oeste", "soc"),
       Q("12 - 5 = ?", ["5", "6", "7", "8"], "7", "mate"),
       Q("¿Cuál es el sinónimo de 'rápido'?", ["Veloz", "Lento", "Triste", "Grande"], "Veloz", "leng"),
       Q("¿Cuánto es 6 x 3?", ["16", "18", "20", "9"], "18", "mate"),
@@ -212,7 +216,9 @@ const DAYS = [
     intro: "Vamos a escribir instrucciones, como las que usa el mozo de cuadra cada mañana.",
     isShowDay: false,
     subjectQuestions: [
-      Q("¿Cuál es el primer paso para cepillar un caballo?", ["Quitar el polvo del pelaje", "Darle de comer", "Ensillarlo", "Bañarlo con jabón"], "Quitar el polvo del pelaje", "leng"),
+      Q("¿Cuál es el primer paso para cepillar un caballo?", ["Quitar el polvo del pelaje", "Darle de comer", "Ensillarlo", "Bañarlo con jabón",
+      Q("¿Cuántos océanos rodean América del Sur?", ["1", "2", "3", "4"], "2", "soc")
+    ], "Quitar el polvo del pelaje", "leng"),
       Q("Un texto instructivo sirve para...", ["Explicar cómo hacer algo paso a paso", "Contar un cuento", "Describir un paisaje", "Expresar sentimientos"], "Explicar cómo hacer algo paso a paso", "leng"),
       Q("¿Qué tipo de verbo se usa en instrucciones como 'Cepilla, moja, seca'?", ["Verbos en imperativo", "Verbos en pasado", "Adjetivos", "Sustantivos"], "Verbos en imperativo", "leng"),
       Q("¿Cuál palabra indica el último paso de una instrucción?", ["Finalmente", "Primero", "Nunca", "Ayer"], "Finalmente", "leng"),
@@ -304,7 +310,9 @@ const DAYS = [
     intro: "¿Quién trabaja en un rancho? Descubramos los oficios y la economía ganadera de Colombia.",
     isShowDay: false,
     subjectQuestions: [
-      Q("¿Qué actividad económica se relaciona con la cría de caballos y ganado?", ["La ganadería", "La pesca", "La minería", "El comercio digital"], "La ganadería", "soc"),
+      Q("¿Qué actividad económica se relaciona con la cría de caballos y ganado?", ["La ganadería", "La pesca", "La minería", "El comercio digital",
+      Q("¿Qué es la línea ecuatorial?", ["Una línea imaginaria que divide la Tierra", "Una montaña", "Un río", "Una frontera"], "Una línea imaginaria que divide la Tierra", "soc")
+    ], "La ganadería", "soc"),
       Q("¿Qué región de Colombia es reconocida por su tradición ganadera y de caballos de paso fino?", ["Los Llanos Orientales", "El Amazonas profundo", "La Guajira desértica", "Ninguna"], "Los Llanos Orientales", "soc"),
       Q("El trabajo de cuidar y entrenar caballos lo hace un...", ["Palafrenero (mozo de cuadra)", "Panadero", "Piloto", "Contador"], "Palafrenero (mozo de cuadra)", "soc"),
       Q("¿Qué es una economía rural?", ["La que depende del campo y la ganadería", "La que solo depende de la tecnología", "La que no existe", "La del mar únicamente"], "La que depende del campo y la ganadería", "soc"),
@@ -397,7 +405,9 @@ const DAYS = [
     intro: "Hoy diseñamos un corral nuevo: toca calcular perímetro y área.",
     isShowDay: false,
     subjectQuestions: [
-      Q("Un corral rectangular mide 5 m de largo y 3 m de ancho. ¿Cuál es su perímetro?", ["8 m", "15 m", "16 m", "10 m"], "16 m", "mate"),
+      Q("Un corral rectangular mide 5 m de largo y 3 m de ancho. ¿Cuál es su perímetro?", ["8 m", "15 m", "16 m", "10 m",
+      Q("¿Cuál es el río más largo de América del Sur?", ["Río de la Plata", "Amazonas", "Orinoco", "Magdalena"], "Amazonas", "soc")
+    ], "16 m", "mate"),
       Q("¿Cuál es el área de ese mismo corral (5 m x 3 m)?", ["8", "15", "16", "20"], "15", "mate"),
       Q("¿Cuántos lados tiene un corral con forma de cuadrado?", ["2", "3", "4", "5"], "4", "mate"),
       Q("Un corral cuadrado tiene lados de 4 m. ¿Cuál es su área?", ["8", "12", "16", "20"], "16", "mate"),
@@ -489,7 +499,9 @@ const DAYS = [
     intro: "¿De dónde viene el agua que beben los caballos? Sigamos el ciclo del agua.",
     isShowDay: false,
     subjectQuestions: [
-      Q("¿Cuál es el primer paso del ciclo del agua?", ["Evaporación", "Un terremoto", "Un nevado", "Ninguno"], "Evaporación", "cien"),
+      Q("¿Cuál es el primer paso del ciclo del agua?", ["Evaporación", "Un terremoto", "Un nevado", "Ninguno",
+      Q("¿En qué siglo llegó Cristóbal Colón a América?", ["Siglo XV", "Siglo XVI", "Siglo XVII", "Siglo XVIII"], "Siglo XV", "soc")
+    ], "Evaporación", "cien"),
       Q("El agua de lluvia llena los... para que beban los caballos.", ["Bebederos y ríos", "Libros", "Sillas", "Cepillos"], "Bebederos y ríos", "cien"),
       Q("¿Qué pasa cuando el agua se evapora?", ["Sube al cielo y forma nubes", "Desaparece para siempre", "Se congela", "Se vuelve tierra"], "Sube al cielo y forma nubes", "cien"),
       Q("¿Cómo se llama cuando el agua sube al cielo en forma de vapor?", ["Evaporación", "Congelación", "Fusión", "Ninguna"], "Evaporación", "cien"),
@@ -580,7 +592,9 @@ const DAYS = [
     date: "Viernes 17 de julio", title: "Concurso Hípico #2", subjectLabel: "Carrera de orientación", isShowDay: true,
     intro: "¡Carrera de orientación! Usa el mapa, calcula distancias y sigue las pistas.",
     subjectQuestions: [
-      Q("La ruta mide 12 km y ya recorriste 7 km. ¿Cuántos km faltan?", ["4", "5", "6", "7"], "5", "mate"),
+      Q("La ruta mide 12 km y ya recorriste 7 km. ¿Cuántos km faltan?", ["4", "5", "6", "7",
+      Q("¿Quiénes eran los muiscas?", ["Pueblo indígena de Colombia", "Conquistadores españoles", "Animales del rancho", "Plantas"], "Pueblo indígena de Colombia", "soc")
+    ], "5", "mate"),
       Q("La pista dice 'gira a la izquierda después del río'. ¿Qué debes hacer primero?", ["Cruzar el río", "Girar", "Ambas a la vez", "Ninguna"], "Cruzar el río", "leng"),
       Q("¿Qué región de Colombia tiene llanuras ideales para cabalgar largas distancias?", ["Los Llanos Orientales", "La alta montaña nevada", "El fondo del mar", "Ninguna"], "Los Llanos Orientales", "soc"),
       Q("La ruta completa mide 20 km. Si ya llevas la mitad, ¿cuántos km has recorrido?", ["5", "10", "15", "20"], "10", "mate"),
@@ -674,7 +688,9 @@ const DAYS = [
     intro: "Vamos a escribir una narración con inicio, nudo y desenlace.",
     isShowDay: false,
     subjectQuestions: [
-      Q("¿Cuáles son las 3 partes de una narración?", ["Inicio, nudo y desenlace", "Título, autor y fecha", "Solo el final", "Ninguna"], "Inicio, nudo y desenlace", "leng"),
+      Q("¿Cuáles son las 3 partes de una narración?", ["Inicio, nudo y desenlace", "Título, autor y fecha", "Solo el final", "Ninguna",
+      Q("¿Cuándo se declaró la independencia de Colombia?", ["1808", "1810", "1816", "1819"], "1810", "soc")
+    ], "Inicio, nudo y desenlace", "leng"),
       Q("¿Qué palabras indican el orden de los sucesos? Ej: 'Primero, luego, finalmente'", ["Conectores temporales", "Sustantivos", "Colores", "Números"], "Conectores temporales", "leng"),
       Q("En el 'nudo' de una historia normalmente ocurre...", ["El problema o conflicto principal", "El final feliz", "La portada del libro", "Nada importante"], "El problema o conflicto principal", "leng"),
       Q("¿En qué parte de la narración se presenta el problema?", ["En el nudo", "En el inicio", "En el desenlace", "En el título"], "En el nudo", "leng"),
@@ -766,7 +782,9 @@ const DAYS = [
     intro: "El caballo se monta en todo el mundo. Conozcamos algunos deportes ecuestres.",
     isShowDay: false,
     subjectQuestions: [
-      Q("El polo es un deporte ecuestre popular en países como...", ["Argentina e Inglaterra", "Solo en Colombia", "Solo en Asia", "En ningún lugar"], "Argentina e Inglaterra", "soc"),
+      Q("El polo es un deporte ecuestre popular en países como...", ["Argentina e Inglaterra", "Solo en Colombia", "Solo en Asia", "En ningún lugar",
+      Q("¿Quién fue Simón Bolívar?", ["Libertador de varios países de América", "Rey de España", "Cazador de caballos", "Inventor"], "Libertador de varios países de América", "soc")
+    ], "Argentina e Inglaterra", "soc"),
       Q("El 'dressage' o doma clásica es un deporte ecuestre de origen...", ["Francés/Europeo", "Africano", "Solo colombiano", "Ninguno"], "Francés/Europeo", "soc"),
       Q("¿Qué valor es importante en los deportes ecuestres?", ["El respeto y cuidado por el animal", "Ganar a cualquier costo", "La velocidad del carro", "Ninguno"], "El respeto y cuidado por el animal", "soc"),
       Q("¿Qué deporte ecuestre se juega en equipo con un mazo y una bola?", ["Polo", "Doma clásica", "Salto", "Ninguno"], "Polo", "soc"),
@@ -859,7 +877,9 @@ const DAYS = [
     intro: "Última semana antes del Gran Concurso. ¡Repasemos todo lo aprendido en matemáticas!",
     isShowDay: false,
     subjectQuestions: [
-      Q("Un caballo recorre 5 km por hora. ¿Cuántos km recorre en 3 horas?", ["10", "15", "20", "8"], "15", "mate"),
+      Q("Un caballo recorre 5 km por hora. ¿Cuántos km recorre en 3 horas?", ["10", "15", "20", "8",
+      Q("¿En qué año se formó la República de la Gran Colombia?", ["1800", "1819", "1830", "1850"], "1819", "soc")
+    ], "15", "mate"),
       Q("¿Cuál es el perímetro de un corral cuadrado de lado 4 m?", ["8", "12", "16", "20"], "16", "mate"),
       Q("3/4 + 1/4 = ?", ["1 (un entero)", "4/8", "2/4", "0"], "1 (un entero)", "mate"),
       Q("¿Cuánto es 9 x 7?", ["56", "63", "72", "54"], "63", "mate"),
@@ -951,7 +971,9 @@ const DAYS = [
     intro: "Creemos un afiche con todo lo que aprendimos sobre el cuidado de los caballos.",
     isShowDay: false,
     subjectQuestions: [
-      Q("¿Qué necesita un caballo para estar sano?", ["Agua, alimento y cuidado", "Solo agua", "Solo compañía", "Nada"], "Agua, alimento y cuidado", "cien"),
+      Q("¿Qué necesita un caballo para estar sano?", ["Agua, alimento y cuidado", "Solo agua", "Solo compañía", "Nada",
+      Q("¿Qué son las cordilleras?", ["Cadenas de montañas", "Ríos grandes", "Océanos", "Ciudades"], "Cadenas de montañas", "soc")
+    ], "Agua, alimento y cuidado", "cien"),
       Q("¿Qué parte del cuerpo usa el caballo para caminar?", ["Las patas y cascos", "Las orejas", "Los ojos", "La cola"], "Las patas y cascos", "cien"),
       Q("El agua de lluvia llega al bebedero gracias a...", ["El ciclo del agua", "La magia", "El viento solo", "Nada"], "El ciclo del agua", "cien"),
       Q("¿Qué grupo de seres vivos NO puede fabricar su propio alimento?", ["Los animales", "Las plantas", "Ambos pueden", "Ninguno"], "Los animales", "cien"),
@@ -1042,7 +1064,9 @@ const DAYS = [
     date: "Viernes 31 de julio", title: "🏆 Gran Concurso de Verano", subjectLabel: "Evento final", isShowDay: true, isFinal: true,
     intro: "¡Es el gran día! Miranda compite en el Gran Concurso de Verano usando todo lo aprendido en julio.",
     subjectQuestions: [
-      Q("Un corral mide 6 m x 4 m. ¿Cuál es su área?", ["24", "20", "10", "28"], "24", "mate"),
+      Q("Un corral mide 6 m x 4 m. ¿Cuál es su área?", ["24", "20", "10", "28",
+      Q("¿Cuántas cordilleras principales tiene Colombia?", ["2", "3", "4", "5"], "3", "soc")
+    ], "24", "mate"),
       Q("¿Cuál es la moraleja típica de las fábulas?", ["Enseñar un valor o lección", "Dar risa nada más", "No tiene sentido", "Ninguna"], "Enseñar un valor o lección", "leng"),
       Q("¿Qué necesita todo ser vivo para vivir?", ["Agua, alimento y aire", "Solo dinero", "Nada", "Solo juguetes"], "Agua, alimento y aire", "cien"),
       Q("¿Qué representan los puntos cardinales en un mapa?", ["Las direcciones norte, sur, este y oeste", "Los colores", "Los números", "Nada"], "Las direcciones norte, sur, este y oeste", "soc"),

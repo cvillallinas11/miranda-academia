@@ -121,9 +121,23 @@ main#view {
 }
 .card h2, .card h3 { margin-top: 0; }
 
-.hero-card { text-align: center; padding: 24px 18px; }
-.hero-horse { font-size: 2.6rem; }
+.hero-card {
+  text-align: center;
+  padding: 24px 18px;
+  background: linear-gradient(135deg, var(--ios-card) 0%, var(--ios-fill) 100%);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+.hero-horse {
+  font-size: 2.6rem;
+  display: inline-block;
+  transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  animation: gentle-bounce 2s ease-in-out infinite;
+}
 .hero-horse.big { font-size: 4rem; }
+@keyframes gentle-bounce {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-4px); }
+}
 
 /* -------- Botones -------- */
 .btn {
@@ -208,10 +222,11 @@ main#view {
 }
 .progress-bar.big { height: 10px; }
 .progress-fill {
-  background: linear-gradient(90deg, var(--gold), var(--tint));
+  background: linear-gradient(90deg, #FFD700, #FFA500, #FF6B6B);
   height: 100%;
   border-radius: 999px;
-  transition: width 0.4s ease;
+  transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 0 12px rgba(255, 215, 0, 0.4);
 }
 
 .muted { color: var(--ios-secondary-label); }
@@ -288,11 +303,15 @@ main#view {
 }
 .week-day-fill {
   width: 100%;
-  background: linear-gradient(180deg, var(--gold), var(--tint));
+  background: linear-gradient(180deg, #FFD700 0%, #FFA500 50%, #FF8C00 100%);
   border-radius: 999px;
-  transition: height 0.3s ease;
+  transition: height 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 0 2px 8px rgba(255, 140, 0, 0.3);
 }
-.week-day.week-day-full .week-day-fill { background: linear-gradient(180deg, #34C759, #1F8B3C); }
+.week-day.week-day-full .week-day-fill {
+  background: linear-gradient(180deg, #34C759 0%, #00C853 50%, #1F8B3C 100%);
+  box-shadow: 0 2px 8px rgba(52, 199, 89, 0.4);
+}
 .week-day-count { font-size: 10px; color: var(--ios-tertiary-label); }
 
 /* -------- Semanas / calendario -------- */
@@ -357,11 +376,16 @@ main#view {
   width: 52px; height: 52px;
   margin: 0 auto 8px;
   display: flex; align-items: center; justify-content: center;
-  background: var(--ios-bg);
+  background: linear-gradient(135deg, var(--ios-bg), var(--ios-fill));
   border-radius: 14px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 .badge-name { font-weight: 700; font-size: 14px; margin: 4px 0; }
-.badge.unlocked .badge-emoji { background: rgba(232, 169, 58, 0.18); }
+.badge.unlocked .badge-emoji {
+  background: linear-gradient(135deg, rgba(232, 169, 58, 0.25), rgba(255, 215, 0, 0.15));
+  box-shadow: 0 4px 12px rgba(232, 169, 58, 0.3);
+  transform: scale(1.05);
+}
 .unlocked-tag { color: #8A6414; font-weight: 700; font-size: 12px; margin-top: 6px; }
 .ribboncard { text-align: center; }
 .ribbon-big { font-size: 1.05rem; font-weight: 800; }
