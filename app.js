@@ -568,11 +568,11 @@ function renderWarmupStep(day) {
     return;
   }
 
-  let currentMatching = 0;
   const prevVocabEn = prevDay.englishVocab.slice(0, 4);
   const matchingPairs = prevVocabEn.map(v => ({ en: v.w, es: v.es }));
-  const shuffledEs = shuffle(matchingPairs.map(p => p.es));
+  const shuffledEs = shuffle([...matchingPairs.map(p => p.es)]);
   let matchedPairs = 0;
+  let selectedLeft = null;
 
   function drawMatching() {
     const maxMatches = matchingPairs.length;
@@ -581,20 +581,22 @@ function renderWarmupStep(day) {
       <div class="card session-card">
         <div class="session-tag">🔥 Calentamiento · Repaso del vocabulario anterior</div>
         <h3>Empareja las palabras (${matchedPairs}/${maxMatches} correctas)</h3>
+        <p class="muted small">Haz click en una palabra en inglés y luego en su traducción</p>
         <div class="matching-container">
           <div class="matching-left">
-            ${prevVocabEn.map((v, i) => `
-              <div class="match-item" data-en="${i}">
-                <span class="match-label">${v.w}</span>
+            ${matchingPairs.map((v, i) => `
+              <div class="match-item ${v.matched ? 'matched' : ''}" data-pair="${i}">
+                <span class="match-label">${v.en}</span>
               </div>
             `).join("")}
           </div>
           <div class="matching-right">
-            ${shuffledEs.map((es, i) => `
-              <div class="match-item" data-es="${matchingPairs.findIndex(p => p.es === es)}">
+            ${shuffledEs.map((es, i) => {
+              const pairIdx = matchingPairs.findIndex(p => p.es === es);
+              return `<div class="match-item ${matchingPairs[pairIdx].matched ? 'matched' : ''}" data-pair="${pairIdx}">
                 <span class="match-label">${es}</span>
-              </div>
-            `).join("")}
+              </div>`;
+            }).join("")}
           </div>
         </div>
         <button class="btn btn-primary" id="matchDoneBtn" ${matchedPairs === maxMatches ? "" : "disabled"}>Siguiente 🐎</button>
@@ -602,8 +604,36 @@ function renderWarmupStep(day) {
     `;
 
     view.querySelectorAll(".match-item").forEach(item => {
+      if (item.classList.contains("matched")) {
+        item.style.opacity = "0.5";
+        return;
+      }
       item.addEventListener("click", function() {
-        this.classList.toggle("selected");
+        const pairIdx = Number(this.dataset.pair);
+
+        if (matchingPairs[pairIdx].matched) return;
+
+        if (!selectedLeft) {
+          selectedLeft = { el: this, idx: pairIdx };
+          this.classList.add("selected");
+        } else {
+          if (selectedLeft.idx === pairIdx) {
+            matchingPairs[pairIdx].matched = true;
+            matchedPairs++;
+            selectedLeft.el.classList.add("matched");
+            this.classList.add("matched");
+            selectedLeft.el.classList.remove("selected");
+            selectedLeft = null;
+
+            if (matchedPairs === maxMatches) {
+              view.querySelector("#matchDoneBtn").disabled = false;
+            }
+            drawMatching();
+          } else {
+            selectedLeft.el.classList.remove("selected");
+            selectedLeft = null;
+          }
+        }
       });
     });
 
