@@ -216,9 +216,7 @@ const DAYS = [
     intro: "Vamos a escribir instrucciones, como las que usa el mozo de cuadra cada mañana.",
     isShowDay: false,
     subjectQuestions: [
-      Q("¿Cuál es el primer paso para cepillar un caballo?", ["Quitar el polvo del pelaje", "Darle de comer", "Ensillarlo", "Bañarlo con jabón",
-      Q("¿Cuántos océanos rodean América del Sur?", ["1", "2", "3", "4"], "2", "soc")
-    ], "Quitar el polvo del pelaje", "leng"),
+      Q("¿Cuál es el primer paso para cepillar un caballo?", ["Quitar el polvo del pelaje", "Darle de comer", "Ensillarlo", "Bañarlo con jabón"], "Quitar el polvo del pelaje", "leng"),
       Q("Un texto instructivo sirve para...", ["Explicar cómo hacer algo paso a paso", "Contar un cuento", "Describir un paisaje", "Expresar sentimientos"], "Explicar cómo hacer algo paso a paso", "leng"),
       Q("¿Qué tipo de verbo se usa en instrucciones como 'Cepilla, moja, seca'?", ["Verbos en imperativo", "Verbos en pasado", "Adjetivos", "Sustantivos"], "Verbos en imperativo", "leng"),
       Q("¿Cuál palabra indica el último paso de una instrucción?", ["Finalmente", "Primero", "Nunca", "Ayer"], "Finalmente", "leng"),
