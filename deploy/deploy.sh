@@ -19,8 +19,9 @@ APP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$APP_DIR"
 
 echo "== Descargando la última versión aprobada de main =="
+REVISION="${1:?Debes indicar la revisión aprobada}"
 git fetch origin main
-git reset --hard origin/main
+git checkout --detach "$REVISION"
 
 # El contenedor corre como usuario sin privilegios con UID/GID fijo 1001
 # (ver Dockerfile). Cualquier operación que toque ./data como root (por
@@ -41,7 +42,7 @@ docker compose pull --ignore-pull-failures || true
 docker compose up -d --build --remove-orphans
 
 echo "== Limpiando imágenes viejas (ahorra espacio en el VPS) =="
-docker image prune -f
+# No limpiar imágenes de otros servicios del VPS.
 
 echo "== Verificando que la app responda =="
 sleep 3

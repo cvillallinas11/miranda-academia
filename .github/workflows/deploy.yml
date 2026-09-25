@@ -1,67 +1,44 @@
-name: Deploy Miranda Academia to VPS
-
+name: Verificar y desplegar Miranda
 on:
   push:
-    branches: [ main ]
+    branches: [main]
+  pull_request:
   workflow_dispatch:
-
+permissions:
+  contents: read
+concurrency:
+  group: miranda-production
+  cancel-in-progress: false
 jobs:
   verify:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Check JavaScript syntax
-        run: |
-          for file in serve.js app.js auth.js; do
-            node -c "$file" && echo "✅ $file syntax OK" || exit 1
-          done
-
-      - name: Smoke test (local server)
-        run: |
-          timeout 5 node serve.js &
-          sleep 2
-          curl -fsS http://127.0.0.1:5183/ > /dev/null && echo "✅ Server OK" || echo "⚠️ Server not responding"
-          pkill -f "node serve.js" || true
-
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - run: npm ci
+      - run: npm test
   deploy:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     needs: verify
     runs-on: ubuntu-latest
-    environment:
-      name: production
-
+    environment: production
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup SSH key
+      - name: Desplegar exactamente la revisión verificada
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_SSH_KEY: ${{ secrets.VPS_SSH_KEY }}
+          VPS_KNOWN_HOSTS: ${{ secrets.VPS_KNOWN_HOSTS }}
+          REVISION: ${{ github.sha }}
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.VPS_SSH_KEY }}" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -H ${{ secrets.VPS_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
-
-      - name: Deploy to VPS
-        run: |
-          ssh -i ~/.ssh/deploy_key -o StrictHostKeyChecking=no \
-            deploy@${{ secrets.VPS_HOST }} \
-            "cd /opt/apps/stable-stars && \
-             git fetch origin main && \
-             git reset --hard origin/main && \
-             mkdir -p data && \
-             chown -R 1001:1001 data 2>/dev/null || sudo -n chown -R 1001:1001 data || true && \
-             docker compose pull --ignore-pull-failures || true && \
-             docker compose up -d --build --remove-orphans && \
-             echo '✅ Deployment complete'"
-
-      - name: Verify deployment
-        run: |
-          sleep 2
-          CODE=$(curl -sk -o /dev/null -w "%{http_code}" https://miranda.vortex-company.tech)
-          echo "HTTP response: $CODE"
-          if [[ "$CODE" == "200" ]]; then
-            echo "✅ Miranda Academia responding OK"
-          else
-            echo "⚠️ Status: $CODE (may be loading)"
-          fi
+          set -euo pipefail
+          test -n "$VPS_HOST" && test -n "$VPS_SSH_KEY" && test -n "$VPS_KNOWN_HOSTS"
+          install -m 700 -d ~/.ssh
+          printf '%s\n' "$VPS_SSH_KEY" > ~/.ssh/deploy_key
+          printf '%s\n' "$VPS_KNOWN_HOSTS" > ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/deploy_key ~/.ssh/known_hosts
+          ssh -i ~/.ssh/deploy_key -o BatchMode=yes -o StrictHostKeyChecking=yes "deploy@$VPS_HOST" "set -eu; cd /opt/apps/stable-stars; git fetch origin main; git checkout --detach $REVISION; bash deploy/deploy.sh $REVISION"
+      - name: Verificar HTTPS
+        run: curl --fail --silent --show-error --retry 5 --retry-delay 5 https://miranda.vortex-company.tech/ > /dev/null

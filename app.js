@@ -1,3 +1,4 @@
+function escapeHTML(value) { return String(value ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;", "'":"&#39;"})[c]); }
 /* =========================================================
    Stable Stars - La Academia de Miranda
    Motor de la app (estado, puntaje, vistas, mini-juegos)
@@ -17,20 +18,30 @@ function loadState() {
   } catch (e) { /* ignore corrupt state */ }
   return { horseName: null, completedDays: {} };
 }
+let progressQueue = Promise.resolve();
+function syncNotice(message) { let el=document.getElementById('syncStatus');if(!el){el=document.createElement('div');el.id='syncStatus';el.setAttribute('role','status');document.querySelector('.app-shell').appendChild(el);}el.textContent=message; }
 function saveState(state) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-  syncProgressToServer(state);
+  const serialized=JSON.stringify(state);
+  localStorage.setItem(STORAGE_KEY,serialized);
+  localStorage.setItem(STORAGE_KEY+'::pending',serialized);
+  return syncProgressToServer(state);
 }
 function syncProgressToServer(state) {
-  const token = window.mirandaAuthToken;
-  if (!token) return;
-  fetch("/api/progress", {
-    method: "POST",
-    headers: { "Content-Type": "application/json", Authorization: "Bearer " + token },
-    body: JSON.stringify({ state }),
-  }).catch(() => { /* sin conexión: el progreso queda a salvo en localStorage igual */ });
+  const token=window.mirandaAuthToken,key=STORAGE_KEY,serialized=JSON.stringify(state);
+  if(!token) return Promise.resolve(false);
+  progressQueue=progressQueue.catch(()=>{}).then(async()=>{
+    try {
+      const response=await fetch('/api/progress',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({state:JSON.parse(serialized)})});
+      if(!response.ok)throw new Error('No se pudo sincronizar');
+      if(localStorage.getItem(key+'::pending')===serialized)localStorage.removeItem(key+'::pending');
+      syncNotice(localStorage.getItem(key+'::pending')?'Guardando cambios…':'Progreso guardado');return true;
+    }catch{syncNotice('Guardado en este navegador · pendiente de sincronizar. Mantén tus datos del navegador.');return false;}
+  });return progressQueue;
 }
+window.addEventListener('online',()=>{if(STATE)syncProgressToServer(STATE);});
 async function fetchServerProgressOrLocal() {
+  const pending=localStorage.getItem(STORAGE_KEY+"::pending");
+  if(pending){const local=JSON.parse(pending);await syncProgressToServer(local);return local;}
   const token = window.mirandaAuthToken;
   if (token) {
     try {
@@ -120,9 +131,9 @@ DAYS.forEach((d) => {
 });
 
 function buildListeningQuestions(vocabList, lang) {
-  const items = vocabList.slice(0, 3);
+  const items = vocabList.slice(0, 4);
   return items.map((v) => {
-    const pool = ALL_ES_WORDS.filter((es) => es !== v.es);
+    const pool = [...new Set(ALL_ES_WORDS.filter((es) => es !== v.es))];
     const distractors = shuffle(pool).slice(0, 2);
     const options = shuffle([v.es, ...distractors]);
     return { word: v.w, lang, correct: v.es, options };
@@ -134,14 +145,8 @@ function buildListeningQuestions(vocabList, lang) {
    que tiene la sesión activa) para que el panel de padres/admin pueda
    reutilizarlas pasando el progreso de otro usuario en modo solo lectura. */
 function dayMaxScore(day) {
-  // Warm-up: hasta 20 puntos
-  // Materia: 10 preguntas × 10 puntos = 100 puntos
-  // English: 4 listening × 5 puntos = 20 puntos
-  // Français: 4 listening × 5 puntos = 20 puntos
-  // Challenge: 20 puntos
-  // Journal: 10 puntos
-  // Total: ~190 puntos (2 horas de contenido)
-  return 20 + day.subjectQuestions.length * 10 + 4 * 5 + 4 * 5 + 20 + 10;
+  // Máximo calculado desde las actividades realmente disponibles.
+  return (DAYS.indexOf(day) > 0 ? 20 : 0) + day.subjectQuestions.length * 10 + Math.min(4, day.englishVocab.length) * 5 + Math.min(4, day.frenchVocab.length) * 5 + 20 + 10 + day.expedition.questions.length * 10 + 10;
 }
 function totalHerraduras(state = STATE) {
   return Object.values(state.completedDays).reduce((s, d) => s + d.score, 0);
@@ -162,9 +167,9 @@ function levelInfo(state = STATE) {
 }
 function catTotals() {
   const totals = { mate: 0, leng: 0, cien: 0, soc: 0 };
-  DAYS.forEach((d) => d.subjectQuestions.forEach((q) => totals[q.cat]++));
-  const en = DAYS.length * 3;
-  const fr = DAYS.length * 3;
+  DAYS.forEach((d) => [...d.subjectQuestions, ...d.expedition.questions].forEach((q) => totals[q.cat]++));
+  const en = DAYS.length * 4;
+  const fr = DAYS.length * 4;
   return { ...totals, en, fr };
 }
 function catProgress(state = STATE) {
@@ -279,20 +284,20 @@ function render() {
 function renderHome() {
   const lvl = levelInfo();
   const completedCount = Object.keys(STATE.completedDays).length;
-  const nextIdx = nextIncompleteDay();
+  const nextIdx = STATE.draft ? STATE.draft.idx : nextIncompleteDay();
   const nextDay = DAYS[nextIdx];
   view.innerHTML = `
     <h2 class="page-title">Inicio</h2>
     <section class="card hero-card">
       <div class="hero-horse">${lvl.emoji}</div>
-      <h2>¡Hola, jinete de ${STATE.horseName}!</h2>
+      <h2>¡Hola, jinete de ${escapeHTML(STATE.horseName)}!</h2>
       <p class="muted">Estás en el rancho "Stable Stars". Nivel actual: <strong>${lvl.name}</strong></p>
       <div class="progress-bar big"><div class="progress-fill" style="width:${Math.round((completedCount / DAYS.length) * 100)}%"></div></div>
       <p class="muted">${completedCount} / ${DAYS.length} jornadas completadas</p>
       <button class="btn btn-primary big" id="continueBtn">🐴 Continuar entrenamiento: ${nextDay.title}</button>
     </section>
     <section class="grid3">
-      <button class="card tile" data-go="calendar">📅<br>Calendario de julio</button>
+      <button class="card tile" data-go="calendar">📅<br>Mi ruta de aprendizaje</button>
       <button class="card tile" data-go="achievements">🏆<br>Mis Logros</button>
       <button class="card tile" data-go="horse">🐎<br>Mi Caballo</button>
     </section>
@@ -314,7 +319,7 @@ function renderHome() {
 
 /* ---------- CALENDARIO ---------- */
 function renderCalendar() {
-  let html = `<h2 class="page-title">📅 Calendario de julio 2026</h2>`;
+  let html = `<h2 class="page-title">📅 Mi ruta · 30 jornadas</h2>`;
   WEEKS.forEach((week, wIdx) => {
     const ribbon = weekRibbon(wIdx);
     html += `<h3 class="week-title">${week.title} ${ribbon ? `<span class="ribbon ${ribbon.cls}">${ribbon.label}</span>` : ""}</h3><div class="day-grid">`;
@@ -372,15 +377,14 @@ async function renderTasks() {
   try {
     data = await tasksApiFetch("/api/tasks");
   } catch (e) {
-    view.innerHTML = `<h2 class="page-title">✅ Mis Tareas</h2><div class="card"><p class="feedback" style="color:#C22A20;">${e.message}</p></div>`;
+    view.innerHTML = `<h2 class="page-title">✅ Mis Tareas</h2><div class="card"><p class="feedback" style="color:#C22A20;">${escapeHTML(e.message)}</p></div>`;
     return;
   }
   view.innerHTML = buildTasksHTML(data, true);
   wireTaskToggles(data);
 }
 function buildTasksHTML(data, interactive) {
-  const todayIdx = SESSION ? SESSION.idx : 0;
-  const activeTasks = data.tasks.filter((t) => t.active && (t.dayIndex === todayIdx || t.dayIndex === undefined));
+  const activeTasks = data.tasks.filter(t => t.active && (!t.scheduledDate || t.scheduledDate === data.today));
   const doneCount = data.completedToday ? data.completedToday.length : 0;
   // Si una tarea se completó hoy y luego el padre la pausó, "total" (solo
   // activas) podría quedar menor que "hechas" -- lo ajustamos solo para
@@ -403,7 +407,7 @@ function buildTasksHTML(data, interactive) {
       const done = data.completedToday.includes(t.id);
       html += `
         <button class="ios-row task-row ${done ? "task-done" : ""}" ${interactive ? `data-task-id="${t.id}"` : "disabled"}>
-          <span>${t.emoji} ${t.title}</span>
+          <span>${escapeHTML(t.emoji)} ${escapeHTML(t.title)}</span>
           <span class="task-check">${done ? "✅" : "☐"}</span>
         </button>`;
     });
@@ -475,7 +479,7 @@ function renderHorse() {
   const lvl = levelInfo();
   const safePct = Math.min(100, Math.round((lvl.total / (lvl.next ? lvl.next.min : lvl.total || 1)) * 100));
   view.innerHTML = `
-    <h2 class="page-title">🐎 Mi Caballo: ${STATE.horseName}</h2>
+    <h2 class="page-title">🐎 Mi Caballo: ${escapeHTML(STATE.horseName)}</h2>
     <div class="card horse-card">
       <div class="hero-horse big">${lvl.emoji}</div>
       <h3>${lvl.name}</h3>
@@ -488,7 +492,7 @@ function renderHorse() {
     <div class="ios-list">
       <div class="ios-row ios-row-static">
         <span>Sesión iniciada como</span>
-        <span class="muted small">${CURRENT_USER ? CURRENT_USER.email : "—"}</span>
+        <span class="muted small">${escapeHTML(CURRENT_USER ? CURRENT_USER.email : "—")}</span>
       </div>
       <button class="ios-row" id="logoutBtn">
         <span>Cerrar sesión</span>
@@ -513,6 +517,8 @@ let SESSION = null;
 function renderDaySession(idx) {
   if (!isUnlocked(idx)) { go("calendar"); return; }
   const day = DAYS[idx];
+  if(!day) {go("calendar");return;}
+  if(STATE.draft && STATE.draft.idx===idx && STATE.draft.step<8){SESSION={...STATE.draft,day,maxScore:dayMaxScore(day)};renderStep();return;}
   SESSION = {
     idx, day,
     step: 0,
@@ -526,7 +532,7 @@ function renderDaySession(idx) {
 }
 
 function sessionProgressBar() {
-  const steps = ["Calentamiento", "Inicio", "Materia", "English", "Français", "Desafío", "Diario", "Resumen"];
+  const steps = ["Calentamiento", "Inicio", "Materia", "English", "Français", "Desafío", "Diario", "Geografía e historia", "Resumen"];
   return `<div class="steps">${steps.map((s, i) => `<span class="step ${i === SESSION.step ? "on" : ""} ${i < SESSION.step ? "done" : ""}">${s}</span>`).join("")}</div>`;
 }
 
@@ -540,10 +546,11 @@ function renderStep() {
     case 4: return renderLangStep(day, "fr");
     case 5: return renderChallengeStep(day);
     case 6: return renderJournalStep(day);
-    case 7: return renderSummaryStep(day);
+    case 7: return renderExpeditionStep(day);
+    case 8: return renderSummaryStep(day);
   }
 }
-function nextStep() { SESSION.step++; renderStep(); }
+function nextStep() { SESSION.step++; if(SESSION.step<8){const {day,...draft}=SESSION;STATE.draft=draft;saveState(STATE);} renderStep(); }
 
 function renderWarmupStep(day) {
   const prevIdx = SESSION.idx - 1;
@@ -585,17 +592,17 @@ function renderWarmupStep(day) {
         <div class="matching-container">
           <div class="matching-left">
             ${matchingPairs.map((v, i) => `
-              <div class="match-item ${v.matched ? 'matched' : ''}" data-pair="${i}">
+              <button type="button" class="match-item ${v.matched ? 'matched' : ''}" data-pair="${i}">
                 <span class="match-label">${v.en}</span>
-              </div>
+              </button>
             `).join("")}
           </div>
           <div class="matching-right">
             ${shuffledEs.map((es, i) => {
               const pairIdx = matchingPairs.findIndex(p => p.es === es);
-              return `<div class="match-item ${matchingPairs[pairIdx].matched ? 'matched' : ''}" data-pair="${pairIdx}">
+              return `<button type="button" class="match-item ${matchingPairs[pairIdx].matched ? 'matched' : ''}" data-pair="${pairIdx}">
                 <span class="match-label">${es}</span>
-              </div>`;
+              </button>`;
             }).join("")}
           </div>
         </div>
@@ -617,6 +624,12 @@ function renderWarmupStep(day) {
           selectedLeft = { el: this, idx: pairIdx };
           this.classList.add("selected");
         } else {
+          if (selectedLeft.el === this || selectedLeft.el.parentElement === this.parentElement) {
+            selectedLeft.el.classList.remove("selected");
+            selectedLeft = { el: this, idx: pairIdx };
+            this.classList.add("selected");
+            return;
+          }
           if (selectedLeft.idx === pairIdx) {
             matchingPairs[pairIdx].matched = true;
             matchedPairs++;
@@ -653,7 +666,7 @@ function renderIntroStep(day) {
       <div class="session-tag">${day.isShowDay ? "🏆 Día de Concurso" : "📘 " + day.subjectLabel}</div>
       <h2>${day.title}</h2>
       <p class="muted">${day.date}</p>
-      <p class="intro-text">${day.intro}</p>
+      <p class="intro-text">${day.intro}</p><div class="lesson-plan"><strong>Tu plan · 150 minutos orientativos</strong><p>Repaso 10 · Materia 25 · Inglés 25 · Francés 25 · Desafío 15 · Diario 20 · Geografía e historia 30.</p><p>Puedes dividirlo en varias sesiones y tomar descansos. El tiempo depende de tu ritmo.</p></div>
       <button class="btn btn-primary big" id="startBtn">Empezar jornada 🐴</button>
     </div>
   `;
@@ -681,7 +694,7 @@ function renderQuizQuestions(questions, heading, onDone) {
         <div class="session-tag">${heading} (${current + 1}/${questions.length})</div>
         <h3>${q.text}</h3>
         <div class="options" id="opts">
-          ${q.options.map((o) => `<button class="opt-btn" data-o="${encodeURIComponent(o)}">${o}</button>`).join("")}
+          ${shuffle(q.options).map((o) => `<button class="opt-btn" data-o="${encodeURIComponent(o)}">${o}</button>`).join("")}
         </div>
         <div id="feedback" class="feedback"></div>
         <button class="btn btn-primary" id="nextQBtn" style="display:none">Siguiente</button>
@@ -887,8 +900,8 @@ function renderJournalStep(day) {
     ${sessionProgressBar()}
     <div class="card session-card">
       <div class="session-tag">📔 Diario de Miranda</div>
-      <h3>${day.journalPrompt}</h3>
-      <textarea id="journalArea" rows="6" placeholder="Escribe aquí...">${SESSION.journalText}</textarea>
+      <h3>${day.journalPrompt}</h3><p>Planifica tus ideas, escribe un párrafo, añade una frase en inglés y otra en francés y revisa tu texto. Puedes trabajar primero en tu cuaderno.</p>
+      <textarea id="journalArea" rows="6" placeholder="Escribe aquí...">${escapeHTML(SESSION.journalText)}</textarea>
       <button class="btn btn-primary big" id="journalDoneBtn">Guardar y continuar</button>
     </div>
   `;
@@ -908,8 +921,10 @@ function renderSummaryStep(day) {
     enCorrect: SESSION.enCorrect,
     frCorrect: SESSION.frCorrect,
     journal: SESSION.journalText,
+    expedition: SESSION.expeditionText || "",
     date: new Date().toISOString(),
   };
+  delete STATE.draft;
   STATE.completedDays[SESSION.idx] = rec;
   saveState(STATE);
   refreshHero();
@@ -928,7 +943,7 @@ function renderSummaryStep(day) {
       <p class="stars big">${"⭐".repeat(stars)}${"☆".repeat(3 - stars)}</p>
       <p class="score-big">🧲 ${rec.score} / ${rec.maxScore} herraduras</p>
       ${newlyUnlocked.length ? `<p class="unlocked-tag">¡Nueva insignia desbloqueada! ${newlyUnlocked.map((id) => BADGES.find((b) => b.id === id).emoji).join(" ")}</p>` : ""}
-      ${day.isFinal ? `<div class="final-celebration">🏆👑🎉<br><strong>¡${STATE.horseName} y Miranda son Campeonas del Gran Concurso de Verano!</strong></div>` : ""}
+      ${day.isFinal ? `<div class="final-celebration">🏆👑🎉<br><strong>¡${escapeHTML(STATE.horseName)} y Miranda son Campeonas del Gran Concurso de Verano!</strong></div>` : ""}
       <button class="btn btn-primary big" id="backHomeBtn">Volver al Rancho</button>
       <button class="btn" id="backCalBtn">Ver Calendario</button>
     </div>
@@ -946,4 +961,14 @@ function resetProgress() {
     window.location.hash = "";
     render();
   }
+}
+
+function renderExpeditionStep(day) {
+  const mission=day.expedition;
+  view.innerHTML=`${sessionProgressBar()}<section class="card expedition-card"><span class="session-tag">Exploración · 30 minutos orientativos</span><h2>${escapeHTML(mission.title)}</h2><div class="landscape" aria-hidden="true">⛰️ 🌳 🐎 🌊</div><p class="reading-text">${escapeHTML(mission.reading)}</p><ol><li>Lee y explica con tus palabras (5 min).</li><li>Responde y revisa las preguntas (5 min).</li><li>Realiza el proyecto en tu cuaderno (15 min).</li><li>Escribe una conclusión y una pregunta nueva (5 min).</li></ol><p><strong>Tu proyecto:</strong> ${escapeHTML(mission.project)}</p><button class="btn btn-primary" id="exploreStart">Comprendí la lectura · practicar</button></section>`;
+  view.querySelector('#exploreStart').addEventListener('click',()=>renderQuizQuestions(mission.questions,'Geografía e historia',(count)=>{
+    SESSION.score+=count*10; SESSION.catCorrect.soc+=count;
+    view.innerHTML=`${sessionProgressBar()}<section class="card"><h2>Mi proyecto de exploración</h2><p>${escapeHTML(mission.project)}</p><label for="projectText">Describe tu trabajo y una conclusión (mínimo 80 caracteres).</label><textarea id="projectText" rows="8"></textarea><p id="projectFeedback" role="status"></p><button class="btn btn-primary" id="projectSave">Guardar proyecto</button></section>`;
+    view.querySelector('#projectSave').addEventListener('click',()=>{const text=view.querySelector('#projectText').value.trim();if(text.length<80){view.querySelector('#projectFeedback').textContent='Añade detalles: qué hiciste, qué aprendiste y qué te gustaría investigar.';return;}SESSION.expeditionText=text;SESSION.score+=10;nextStep();});
+  }));
 }

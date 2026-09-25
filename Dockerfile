@@ -2,7 +2,7 @@
 # Multi-stage no hace falta (no hay paso de build), pero sí usuario no-root
 # y solo dependencias de producción para mantener la imagen mínima.
 
-FROM node:20-alpine
+FROM node:22-alpine
 
 # Usuario sin privilegios (por defecto Docker corre como root, mala práctica).
 # UID/GID fijos (1001) -- importante: si se dejan sin fijar, Alpine asigna el

@@ -19,7 +19,7 @@ require("dotenv").config({ path: path.join(__dirname, ".env") });
 
 const PORT = process.env.PORT || 5183;
 const ROOT = __dirname;
-const DATA_DIR = path.join(ROOT, "data");
+const DATA_DIR = process.env.DATA_DIR || path.join(ROOT, "data");
 const USERS_FILE = path.join(DATA_DIR, "users.json");
 const SESSIONS_FILE = path.join(DATA_DIR, "sessions.json");
 const PROGRESS_FILE = path.join(DATA_DIR, "progress.json");
@@ -50,11 +50,13 @@ function ensureDataDir() {
   if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 function readJson(file, fallback) {
-  try { return JSON.parse(fs.readFileSync(file, "utf8")); } catch (e) { return fallback; }
+  try { return JSON.parse(fs.readFileSync(file, "utf8")); } catch (e) { if (e.code === "ENOENT") return fallback; throw e; }
 }
 function writeJson(file, data) {
   ensureDataDir();
-  fs.writeFileSync(file, JSON.stringify(data, null, 2));
+  const temporary = file + ".tmp";
+  fs.writeFileSync(temporary, JSON.stringify(data, null, 2), { mode: 0o600 });
+  fs.renameSync(temporary, file);
 }
 
 let users = readJson(USERS_FILE, []);          // [{email, name, role, parentEmail, passwordHash, passwordSalt, createdAt}]
@@ -70,27 +72,33 @@ function getChildTaskData(email) {
   if (!tasksStore[email]) tasksStore[email] = { tasks: [], completions: {} };
   return tasksStore[email];
 }
-function todayISO() { return new Date().toISOString().slice(0, 10); }
+function todayISO() { return new Intl.DateTimeFormat("en-CA", { timeZone: "America/Bogota", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date()); }
+function validDate(value) { return typeof value === "string" && /^\d{4}-\d{2}-\d{2}$/.test(value) && Number.isFinite(Date.parse(value)) && new Date(value).toISOString().slice(0,10) === value; }
+function taskDate(task) {
+  if (task.scheduledDate) return task.scheduledDate;
+  if (Number.isInteger(task.dayIndex)) {
+    const dates=[]; for(let i=1;i<=31;i++){const d=new Date(Date.UTC(2026,6,i));if(d.getUTCDay()>0 && d.getUTCDay()<6)dates.push(d.toISOString().slice(0,10));}
+    return dates[task.dayIndex] || null;
+  }
+  return null;
+}
+function taskDue(task,date) { const scheduled=taskDate(task); return !scheduled || scheduled===date; }
 function last7Days() {
   const days = [];
   for (let i = 6; i >= 0; i--) {
-    const d = new Date();
+    const d = new Date(todayISO() + "T12:00:00Z");
     d.setUTCDate(d.getUTCDate() - i);
     days.push(d.toISOString().slice(0, 10));
   }
   return days;
 }
 function buildTasksResponse(email) {
-  const data = getChildTaskData(email);
-  const activeTasks = data.tasks.filter((t) => t.active);
-  const today = todayISO();
-  const completedToday = data.completions[today] || [];
-  const week = last7Days().map((date) => ({
-    date,
-    done: (data.completions[date] || []).length,
-    total: activeTasks.length,
-  }));
-  return { tasks: data.tasks, today, completedToday, week };
+  const data=getChildTaskData(email), today=todayISO();
+  if(!data.dailyTotals) data.dailyTotals={};
+  const active=data.tasks.filter(t=>t.active && taskDue(t,today));
+  data.dailyTotals[today]=Math.max(data.dailyTotals[today]||0,active.length,(data.completions[today]||[]).length);
+  saveTasks();
+  return {tasks:data.tasks.filter(t=>!t.deleted).map(t=>({...t,scheduledDate:taskDate(t)})),today,completedToday:data.completions[today]||[],week:last7Days().map(date=>({date,done:(data.completions[date]||[]).length,total:Math.max(data.dailyTotals[date]||0,(data.completions[date]||[]).length)}))};
 }
 
 function findUser(email) { return users.find((u) => u.email === email); }
@@ -133,7 +141,7 @@ function auditLog(event, details, req) {
 function getClientIp(req) {
   if (TRUST_PROXY) {
     const fwd = req.headers["x-forwarded-for"];
-    if (fwd) return fwd.split(",")[0].trim();
+    if (fwd) return fwd.split(",").at(-1).trim();
   }
   return req.socket.remoteAddress || "desconocida";
 }
@@ -179,8 +187,10 @@ function bootstrapAdmin() {
   if (password.length < MIN_PASSWORD_LENGTH) {
     console.log(`⚠️  ADMIN_PASSWORD tiene menos de ${MIN_PASSWORD_LENGTH} caracteres. Cámbiala en .env antes de desplegar a producción.`);
   }
-  const { salt, hash } = hashPassword(password);
   const existing = findUser(email);
+  if (existing) return;
+  if (password.length < MIN_PASSWORD_LENGTH) throw new Error("ADMIN_PASSWORD demasiado corta");
+  const { salt, hash } = hashPassword(password);
   if (existing) {
     existing.role = "admin";
     existing.passwordHash = hash;
@@ -190,7 +200,7 @@ function bootstrapAdmin() {
     users.push({ email, name: "Admin", role: "admin", parentEmail: null, passwordHash: hash, passwordSalt: salt, createdAt: new Date().toISOString() });
   }
   saveUsers();
-  console.log(`✅ Super admin listo: ${email} (la contraseña se toma de .env en cada arranque)`);
+  console.log(`✅ Super admin listo: ${email} (cuenta inicial creada)`);
 }
 bootstrapAdmin();
 
@@ -209,7 +219,7 @@ async function sendWelcomeEmail(toEmail, name, password, isReset) {
   const t = getTransporter();
   const subject = isReset ? "🐴 Tu nueva contraseña de Stable Stars" : "🐴 ¡Bienvenido(a) a Stable Stars!";
   if (!t) {
-    console.log(`\n[AVISO] SMTP no configurado. ${isReset ? "Nueva contraseña" : "Contraseña"} para ${toEmail}: ${password}\n`);
+    console.log("SMTP no configurado: contraseña entregada únicamente al administrador.");
     return { sent: false };
   }
   await t.sendMail({
@@ -237,7 +247,7 @@ function readBody(req) {
     req.on("data", (chunk) => { body += chunk; if (body.length > 1e6) req.destroy(); });
     req.on("end", () => {
       if (!body) return resolve({});
-      try { resolve(JSON.parse(body)); } catch (e) { reject(e); }
+      try { const parsed=JSON.parse(body); if(!parsed || typeof parsed!=="object" || Array.isArray(parsed))throw new Error("JSON inválido");resolve(parsed); } catch (e) { reject(e); }
     });
     req.on("error", reject);
   });
@@ -281,7 +291,9 @@ function getSession(req) {
     saveSessions();
     return null;
   }
-  return { token, ...raw };
+  const user = findUser(raw.email);
+  if (!user) return null;
+  return { ...raw, token, role: user.role, name: user.name };
 }
 function isValidEmail(email) {
   return typeof email === "string" && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
@@ -343,7 +355,12 @@ async function handleSaveOwnProgress(req, res) {
   if (!session) return sendJson(res, 401, { ok: false, error: "Sesión inválida" });
   let body;
   try { body = await readBody(req); } catch (e) { return sendJson(res, 400, { ok: false, error: "JSON inválido" }); }
-  if (!body.state || typeof body.state !== "object") return sendJson(res, 400, { ok: false, error: "Falta el estado" });
+  if (!body || !body.state || typeof body.state !== "object" || Array.isArray(body.state) || !body.state.completedDays || typeof body.state.completedDays !== "object" || Array.isArray(body.state.completedDays) || (body.state.horseName !== null && typeof body.state.horseName !== "string")) return sendJson(res, 400, { ok: false, error: "Falta el estado" });
+  for (const [key, record] of Object.entries(body.state.completedDays)) {
+    if (!/^\d+$/.test(key) || Number(key)>=30 || !record || !Number.isFinite(record.score) || !Number.isFinite(record.maxScore) || record.maxScore<=0 || record.score<0 || record.score>record.maxScore || !record.catCorrect || typeof record.catCorrect!=="object") return sendJson(res,400,{ok:false,error:"Progreso inválido"});
+    if (Object.values(record.catCorrect).some(n=>!Number.isInteger(n)||n<0)) return sendJson(res,400,{ok:false,error:"Conteos inválidos"});
+  }
+  if (body.state.draft && (!Number.isInteger(body.state.draft.idx) || body.state.draft.idx<0 || body.state.draft.idx>=30 || !Number.isInteger(body.state.draft.step) || body.state.draft.step<0 || body.state.draft.step>=8))return sendJson(res,400,{ok:false,error:"Borrador inválido"});
   progressStore[session.email] = body.state;
   saveProgress();
   sendJson(res, 200, { ok: true });
@@ -360,7 +377,7 @@ function handleToggleOwnTask(req, res, taskId) {
   if (!session) return sendJson(res, 401, { ok: false, error: "Sesión inválida" });
   const data = getChildTaskData(session.email);
   const task = data.tasks.find((t) => t.id === taskId);
-  if (!task || !task.active) return sendJson(res, 404, { ok: false, error: "Tarea no encontrada" });
+  if (!task || !task.active || !taskDue(task, todayISO())) return sendJson(res, 404, { ok: false, error: "Tarea no encontrada" });
   const today = todayISO();
   if (!data.completions[today]) data.completions[today] = [];
   const idx = data.completions[today].indexOf(taskId);
@@ -395,17 +412,20 @@ async function handleManageCreateTask(req, res, email) {
   try { body = await readBody(req); } catch (e) { return sendJson(res, 400, { ok: false, error: "JSON inválido" }); }
   const title = (body.title || "").toString().trim().slice(0, 60);
   const emoji = (body.emoji || "📌").toString().trim().slice(0, 4) || "📌";
-  const dayIndex = Number(body.dayIndex) || 0; // Día asignado (0-22), por defecto día actual
+  const scheduledDate = body.scheduledDate;
+  const dayIndex = undefined; // Día asignado (0-22), por defecto día actual
   if (!title) return sendJson(res, 400, { ok: false, error: "Falta el título de la tarea" });
-  if (dayIndex < 0 || dayIndex > 22) return sendJson(res, 400, { ok: false, error: "Día inválido (0-22)" });
+  if (!validDate(scheduledDate)) return sendJson(res, 400, { ok: false, error: "Selecciona una fecha válida" });
   const data = getChildTaskData(email);
-  if (data.tasks.filter((t) => t.active).length >= 20) {
+  if (data.tasks.filter((t) => t.active && taskDue(t, scheduledDate)).length >= 20) {
     return sendJson(res, 400, { ok: false, error: "Ya hay 20 tareas activas, elimina alguna antes de agregar más." });
   }
-  const task = { id: crypto.randomBytes(6).toString("hex"), title, emoji, active: true, dayIndex, createdAt: new Date().toISOString() };
+  const task = { id: crypto.randomBytes(6).toString("hex"), title, emoji, active: true, scheduledDate, createdAt: new Date().toISOString() };
   data.tasks.push(task);
+  if(!data.dailyTotals)data.dailyTotals={};
+  data.dailyTotals[scheduledDate]=data.tasks.filter(t=>t.active && taskDue(t,scheduledDate)).length;
   saveTasks();
-  auditLog("task_created", { actor: actor.email, target: email, taskId: task.id, title, dayIndex }, req);
+  auditLog("task_created", { actor: actor.email, target: email, taskId: task.id, title, scheduledDate }, req);
   sendJson(res, 200, { ok: true, ...buildTasksResponse(email) });
 }
 async function handleManageUpdateTask(req, res, email, taskId) {
@@ -426,14 +446,12 @@ async function handleManageUpdateTask(req, res, email, taskId) {
 function handleManageDeleteTask(req, res, email, taskId) {
   const actor = requireCanManageTasks(req, res, email);
   if (!actor) return;
+  buildTasksResponse(email);
   const data = getChildTaskData(email);
   const idx = data.tasks.findIndex((t) => t.id === taskId);
   if (idx === -1) return sendJson(res, 404, { ok: false, error: "Tarea no encontrada" });
-  data.tasks.splice(idx, 1);
-  Object.values(data.completions).forEach((list) => {
-    const i = list.indexOf(taskId);
-    if (i !== -1) list.splice(i, 1);
-  });
+  data.tasks[idx].deleted = true;
+  data.tasks[idx].active = false;
   saveTasks();
   auditLog("task_deleted", { actor: actor.email, target: email, taskId }, req);
   sendJson(res, 200, { ok: true, ...buildTasksResponse(email) });
@@ -490,6 +508,7 @@ async function handleAdminUpdateUser(req, res, email) {
   let body;
   try { body = await readBody(req); } catch (e) { return sendJson(res, 400, { ok: false, error: "JSON inválido" }); }
 
+  if (body.parentEmail && (body.role || user.role) === "child") { const parent=findUser(String(body.parentEmail).trim().toLowerCase()); if(!parent || parent.role!=="parent")return sendJson(res,400,{ok:false,error:"Padre o madre inválido"}); }
   if (typeof body.name === "string" && body.name.trim()) user.name = body.name.trim().slice(0, 40);
   if (ROLES.includes(body.role)) user.role = body.role;
   if (user.role === "child") {
@@ -521,6 +540,8 @@ async function handleAdminResetPassword(req, res, email) {
   const { salt, hash } = hashPassword(password);
   user.passwordHash = hash;
   user.passwordSalt = salt;
+  Object.keys(sessions).forEach(t => { if (sessions[t].email === email) delete sessions[t]; });
+  saveSessions();
   saveUsers();
   clearFailedLogins(user.email);
   auditLog("password_reset", { actor: admin.email, target: email }, req);
@@ -599,7 +620,9 @@ function serveStatic(req, res) {
 }
 
 /* ---------- Servidor ---------- */
-const server = http.createServer((req, res) => {
+const server = http.createServer(async (req, res) => {
+  try {
+  try { decodeURIComponent(req.url); } catch { return sendJson(res, 400, { ok: false, error: "URL inválida" }); }
   const url = req.url.split("?")[0];
   const method = req.method;
 
@@ -607,33 +630,34 @@ const server = http.createServer((req, res) => {
     return sendJson(res, 429, { ok: false, error: "Demasiadas solicitudes. Intenta de nuevo en un momento." });
   }
 
-  if (method === "POST" && url === "/api/auth/login") return handleLogin(req, res);
-  if (method === "POST" && url === "/api/auth/logout") return handleLogout(req, res);
-  if (method === "GET" && url === "/api/auth/me") return handleMe(req, res);
+  if (method === "POST" && url === "/api/auth/login") return await handleLogin(req, res);
+  if (method === "POST" && url === "/api/auth/logout") return await handleLogout(req, res);
+  if (method === "GET" && url === "/api/auth/me") return await handleMe(req, res);
 
-  if (method === "GET" && url === "/api/progress") return handleGetOwnProgress(req, res);
-  if (method === "POST" && url === "/api/progress") return handleSaveOwnProgress(req, res);
+  if (method === "GET" && url === "/api/progress") return await handleGetOwnProgress(req, res);
+  if (method === "POST" && url === "/api/progress") return await handleSaveOwnProgress(req, res);
 
-  if (method === "GET" && url === "/api/tasks") return handleGetOwnTasks(req, res);
+  if (method === "GET" && url === "/api/tasks") return await handleGetOwnTasks(req, res);
   let mt;
-  if (method === "POST" && (mt = url.match(/^\/api\/tasks\/([^/]+)\/toggle$/))) return handleToggleOwnTask(req, res, decodeURIComponent(mt[1]));
-  if (method === "GET" && (mt = url.match(/^\/api\/tasks\/manage\/([^/]+)$/))) return handleManageListTasks(req, res, decodeURIComponent(mt[1]));
-  if (method === "POST" && (mt = url.match(/^\/api\/tasks\/manage\/([^/]+)$/))) return handleManageCreateTask(req, res, decodeURIComponent(mt[1]));
-  if (method === "PUT" && (mt = url.match(/^\/api\/tasks\/manage\/([^/]+)\/([^/]+)$/))) return handleManageUpdateTask(req, res, decodeURIComponent(mt[1]), decodeURIComponent(mt[2]));
-  if (method === "DELETE" && (mt = url.match(/^\/api\/tasks\/manage\/([^/]+)\/([^/]+)$/))) return handleManageDeleteTask(req, res, decodeURIComponent(mt[1]), decodeURIComponent(mt[2]));
+  if (method === "POST" && (mt = url.match(/^\/api\/tasks\/([^/]+)\/toggle$/))) return await handleToggleOwnTask(req, res, decodeURIComponent(mt[1]));
+  if (method === "GET" && (mt = url.match(/^\/api\/tasks\/manage\/([^/]+)$/))) return await handleManageListTasks(req, res, decodeURIComponent(mt[1]));
+  if (method === "POST" && (mt = url.match(/^\/api\/tasks\/manage\/([^/]+)$/))) return await handleManageCreateTask(req, res, decodeURIComponent(mt[1]));
+  if (method === "PUT" && (mt = url.match(/^\/api\/tasks\/manage\/([^/]+)\/([^/]+)$/))) return await handleManageUpdateTask(req, res, decodeURIComponent(mt[1]), decodeURIComponent(mt[2]));
+  if (method === "DELETE" && (mt = url.match(/^\/api\/tasks\/manage\/([^/]+)\/([^/]+)$/))) return await handleManageDeleteTask(req, res, decodeURIComponent(mt[1]), decodeURIComponent(mt[2]));
 
-  if (method === "GET" && url === "/api/admin/users") return handleAdminListUsers(req, res);
-  if (method === "POST" && url === "/api/admin/users") return handleAdminCreateUser(req, res);
+  if (method === "GET" && url === "/api/admin/users") return await handleAdminListUsers(req, res);
+  if (method === "POST" && url === "/api/admin/users") return await handleAdminCreateUser(req, res);
   let m;
-  if (method === "PUT" && (m = url.match(/^\/api\/admin\/users\/([^/]+)$/))) return handleAdminUpdateUser(req, res, decodeURIComponent(m[1]));
-  if (method === "DELETE" && (m = url.match(/^\/api\/admin\/users\/([^/]+)$/))) return handleAdminDeleteUser(req, res, decodeURIComponent(m[1]));
-  if (method === "POST" && (m = url.match(/^\/api\/admin\/users\/([^/]+)\/reset-password$/))) return handleAdminResetPassword(req, res, decodeURIComponent(m[1]));
-  if (method === "GET" && (m = url.match(/^\/api\/admin\/progress\/([^/]+)$/))) return handleAdminGetProgress(req, res, decodeURIComponent(m[1]));
+  if (method === "PUT" && (m = url.match(/^\/api\/admin\/users\/([^/]+)$/))) return await handleAdminUpdateUser(req, res, decodeURIComponent(m[1]));
+  if (method === "DELETE" && (m = url.match(/^\/api\/admin\/users\/([^/]+)$/))) return await handleAdminDeleteUser(req, res, decodeURIComponent(m[1]));
+  if (method === "POST" && (m = url.match(/^\/api\/admin\/users\/([^/]+)\/reset-password$/))) return await handleAdminResetPassword(req, res, decodeURIComponent(m[1]));
+  if (method === "GET" && (m = url.match(/^\/api\/admin\/progress\/([^/]+)$/))) return await handleAdminGetProgress(req, res, decodeURIComponent(m[1]));
 
-  if (method === "GET" && url === "/api/parent/children") return handleParentChildren(req, res);
-  if (method === "GET" && (m = url.match(/^\/api\/parent\/progress\/([^/]+)$/))) return handleParentProgress(req, res, decodeURIComponent(m[1]));
+  if (method === "GET" && url === "/api/parent/children") return await handleParentChildren(req, res);
+  if (method === "GET" && (m = url.match(/^\/api\/parent\/progress\/([^/]+)$/))) return await handleParentProgress(req, res, decodeURIComponent(m[1]));
 
   serveStatic(req, res);
+  } catch (error) { console.error("Solicitud fallida:", error.message); if (!res.headersSent) sendJson(res, 500, { ok: false, error: "No se pudo completar la solicitud" }); else res.end(); }
 });
 
 /* Limpieza periódica en memoria: sesiones vencidas y contadores viejos de
@@ -655,7 +679,7 @@ setInterval(() => {
 // habla, por el socket local. En desarrollo se deja en todas las interfaces.
 const HOST = process.env.HOST || "0.0.0.0";
 server.listen(PORT, HOST, () => {
-  console.log(`Stable Stars corriendo en http://${HOST}:${PORT}`);
+  console.log(`Stable Stars corriendo en http://${HOST}:${server.address().port}`);
   if (!TRUST_PROXY && HOST === "127.0.0.1") {
     console.log("⚠️  HOST=127.0.0.1 pero TRUST_PROXY no está en '1': el rate-limit usará siempre la IP de nginx, no la del visitante real. Revisa DEPLOYMENT.md.");
   }

@@ -21,7 +21,7 @@ async function apiFetch(path, opts = {}) {
 /* ---------- Vista de progreso reutilizable (admin y padre) ---------- */
 function renderProgressBlock(state, childName) {
   if (!state) {
-    return `<div class="card"><p class="muted">${childName} todavía no ha empezado a jugar. En cuanto complete su primera jornada, el progreso aparecerá aquí.</p></div>`;
+    return `<div class="card"><p class="muted">${escapeHTML(childName)} todavía no ha empezado a jugar. En cuanto complete su primera jornada, el progreso aparecerá aquí.</p></div>`;
   }
   const lvl = levelInfo(state);
   const completedCount = Object.keys(state.completedDays).length;
@@ -31,7 +31,7 @@ function renderProgressBlock(state, childName) {
   let html = `
     <div class="card hero-card">
       <div class="hero-horse">${lvl.emoji}</div>
-      <h3>${state.horseName ? `Caballo: ${state.horseName}` : "Aún sin caballo"}</h3>
+      <h3>${state.horseName ? `Caballo: ${escapeHTML(state.horseName)}` : "Aún sin caballo"}</h3>
       <p class="muted">Nivel: <strong>${lvl.name}</strong> · 🧲 ${lvl.total} herraduras</p>
       <div class="progress-bar big"><div class="progress-fill" style="width:${Math.round((completedCount / DAYS.length) * 100)}%"></div></div>
       <p class="muted small">${completedCount} / ${DAYS.length} jornadas completadas</p>
@@ -82,7 +82,7 @@ async function renderTasksManageBlock(container, email) {
   try {
     data = await apiFetch("/api/tasks/manage/" + encodeURIComponent(email));
   } catch (e) {
-    container.innerHTML = `<p class="feedback" style="color:#C22A20;">${e.message}</p>`;
+    container.innerHTML = `<p class="feedback" style="color:#C22A20;">${escapeHTML(e.message)}</p>`;
     return;
   }
 
@@ -91,9 +91,7 @@ async function renderTasksManageBlock(container, email) {
       <h3>+ Nueva tarea</h3>
       <input id="ntEmoji" class="ios-input" style="width:56px; text-align:center; display:inline-block; vertical-align:top;" maxlength="2" value="📌" />
       <input id="ntTitle" class="ios-input" style="width:calc(100% - 140px); text-align:left; display:inline-block; margin-left:6px;" placeholder="Ej: Cepillarse los dientes" maxlength="60" />
-      <select id="ntDay" class="ios-input" style="width:100%; margin-top:8px; display:block;">
-        ${DAYS.map((d, i) => `<option value="${i}">Día ${i + 1}: ${d.title}</option>`).join("")}
-      </select>
+      <label for="ntDay">Fecha de la tarea</label><input id="ntDay" class="ios-input" type="date" value="${data.today}" required />
       <div id="ntError" class="feedback" style="color:#C22A20;"></div>
       <button class="btn btn-primary small" id="ntSubmit">Agregar tarea</button>
     </div>
@@ -102,8 +100,8 @@ async function renderTasksManageBlock(container, email) {
       ${data.tasks.map((t) => `
         <div class="ios-row ios-row-static" style="align-items:center;">
           <div>
-            <span>${t.active ? "" : "⏸ "}${t.emoji} ${t.title}</span>
-            ${typeof t.dayIndex === "number" ? `<div class="muted small">Día ${t.dayIndex + 1}: ${DAYS[t.dayIndex] ? DAYS[t.dayIndex].title : ""}</div>` : ""}
+            <span>${t.active ? "" : "⏸ "}${escapeHTML(t.emoji)} ${escapeHTML(t.title)}</span>
+            ${t.scheduledDate ? `<div class="muted small">${escapeHTML(t.scheduledDate)}</div>` : typeof t.dayIndex === "number" ? `<div class="muted small">Día ${t.dayIndex + 1}: ${DAYS[t.dayIndex] ? DAYS[t.dayIndex].title : ""}</div>` : ""}
           </div>
           <span>
             <button class="btn tiny" data-action="toggle" data-id="${t.id}" data-active="${t.active}">${t.active ? "Pausar" : "Reanudar"}</button>
@@ -129,12 +127,12 @@ async function renderTasksManageBlock(container, email) {
   container.querySelector("#ntSubmit").addEventListener("click", async () => {
     const emoji = container.querySelector("#ntEmoji").value.trim() || "📌";
     const title = container.querySelector("#ntTitle").value.trim();
-    const dayIndex = Number(container.querySelector("#ntDay").value) || 0;
+    const scheduledDate = container.querySelector("#ntDay").value;
     const errBox = container.querySelector("#ntError");
     errBox.textContent = "";
     if (!title) { errBox.textContent = "Escribe el nombre de la tarea."; return; }
     try {
-      await apiFetch("/api/tasks/manage/" + encodeURIComponent(email), { method: "POST", body: JSON.stringify({ title, emoji, dayIndex }) });
+      await apiFetch("/api/tasks/manage/" + encodeURIComponent(email), { method: "POST", body: JSON.stringify({ title, emoji, scheduledDate }) });
       renderTasksManageBlock(container, email);
     } catch (e) {
       errBox.textContent = e.message;
@@ -151,7 +149,7 @@ async function renderTasksManageBlock(container, email) {
   });
   container.querySelectorAll('[data-action="delete"]').forEach((btn) => {
     btn.addEventListener("click", async () => {
-      if (!window.confirm("¿Eliminar esta tarea? También se borra su historial.")) return;
+      if (!window.confirm("¿Archivar esta tarea? Se conservará el historial.")) return;
       try {
         await apiFetch("/api/tasks/manage/" + encodeURIComponent(email) + "/" + btn.dataset.id, { method: "DELETE" });
         renderTasksManageBlock(container, email);
@@ -215,7 +213,7 @@ function renderParentRoute() {
 function renderParentHome() {
   let html = `<h2 class="page-title">👪 Mis hijos</h2>`;
   if (!PARENT_CHILDREN.length) {
-    html += `<div class="card"><p class="muted">Todavía no tienes ningún hijo vinculado a tu cuenta. Pídele al super admin que cree la cuenta de tu hijo(a) y la vincule a tu correo (${PARENT_USER.email}).</p></div>`;
+    html += `<div class="card"><p class="muted">Todavía no tienes ningún hijo vinculado a tu cuenta. Pídele al super admin que cree la cuenta de tu hijo(a) y la vincule a tu correo (${escapeHTML(PARENT_USER.email)}).</p></div>`;
     portalView.innerHTML = html;
     return;
   }
@@ -226,7 +224,7 @@ function renderParentHome() {
   }
   html += `<div class="ios-list">`;
   PARENT_CHILDREN.forEach((c) => {
-    html += `<button class="ios-row" data-email="${encodeURIComponent(c.email)}"><span>🐴 ${c.name}</span><span class="ios-chevron">›</span></button>`;
+    html += `<button class="ios-row" data-email="${encodeURIComponent(c.email)}"><span>🐴 ${escapeHTML(c.name)}</span><span class="ios-chevron">›</span></button>`;
   });
   html += `</div>`;
   portalView.innerHTML = html;
@@ -238,7 +236,7 @@ function renderParentHome() {
 async function renderParentChildDetail(email) {
   const child = PARENT_CHILDREN.find((c) => c.email === email);
   const backBtn = PARENT_CHILDREN.length > 1 ? `<button class="btn" id="backBtn">‹ Mis hijos</button>` : "";
-  portalView.innerHTML = `<h2 class="page-title">🐴 ${child ? child.name : "Progreso"}</h2>${backBtn}
+  portalView.innerHTML = `<h2 class="page-title">🐴 ${escapeHTML(child ? child.name : "Progreso")}</h2>${backBtn}
     <div class="ios-section-label">Tareas diarias</div>
     <div id="tasksBlock"><p class="muted">Cargando tareas...</p></div>
     <div class="ios-section-label">Progreso académico</div>
@@ -251,7 +249,7 @@ async function renderParentChildDetail(email) {
     const data = await apiFetch("/api/parent/progress/" + encodeURIComponent(email));
     portalView.querySelector("#progressBlock").innerHTML = renderProgressBlock(data.state, child ? child.name : "");
   } catch (e) {
-    portalView.querySelector("#progressBlock").innerHTML = `<div class="card"><p class="feedback" style="color:#C22A20;">${e.message}</p></div>`;
+    portalView.querySelector("#progressBlock").innerHTML = `<div class="card"><p class="feedback" style="color:#C22A20;">${escapeHTML(e.message)}</p></div>`;
   }
 }
 
@@ -311,7 +309,7 @@ async function renderAdminUsers() {
     const data = await apiFetch("/api/admin/users");
     users = data.users;
   } catch (e) {
-    portalView.querySelector("#usersList").innerHTML = `<p class="feedback" style="color:#C22A20;">${e.message}</p>`;
+    portalView.querySelector("#usersList").innerHTML = `<p class="feedback" style="color:#C22A20;">${escapeHTML(e.message)}</p>`;
     return;
   }
 
@@ -338,7 +336,7 @@ function buildCreateUserForm(users) {
       </select>
       <select id="nuParent" class="ios-select" style="display:none;">
         <option value="">Sin padre/madre asignado (puedes vincularlo después)</option>
-        ${parents.map((p) => `<option value="${p.email}">${p.name} (${p.email})</option>`).join("")}
+        ${parents.map((p) => `<option value="${escapeHTML(p.email)}">${escapeHTML(p.name)} (${escapeHTML(p.email)})</option>`).join("")}
       </select>
       <input id="nuPassword" class="ios-input" style="width:100%; text-align:left;" type="text" placeholder="Contraseña (vacío = generar automática)" />
       <div id="nuError" class="feedback" style="color:#C22A20;"></div>
@@ -370,7 +368,7 @@ function wireCreateUserForm(users) {
         method: "POST",
         body: JSON.stringify({ name, email, role, parentEmail, password }),
       });
-      resultBox.innerHTML = `<p class="feedback" style="color:#1F8B3C;">¡Usuario creado!${data.tempPassword ? ` Contraseña: <strong>${data.tempPassword}</strong> (guárdala, no quedó visible en ningún otro lado).` : " Se envió la contraseña por correo."}</p>`;
+      resultBox.innerHTML = `<p class="feedback" style="color:#1F8B3C;">¡Usuario creado!${data.tempPassword ? ` Contraseña: <strong>${escapeHTML(data.tempPassword)}</strong> (guárdala, no quedó visible en ningún otro lado).` : " Se envió la contraseña por correo."}</p>`;
       setTimeout(() => renderAdminUsers(), 1800);
     } catch (e) {
       errorBox.textContent = e.message;
@@ -395,9 +393,9 @@ function renderUsersList(users) {
         <div class="card user-card" data-email="${encodeURIComponent(u.email)}">
           <div class="user-card-head">
             <div>
-              <strong>${u.name}</strong>
-              <div class="muted small">${u.email}</div>
-              ${role === "child" ? `<div class="muted small">${parentName ? "Vinculado a: " + parentName : "Sin padre/madre vinculado"}</div>` : ""}
+              <strong>${escapeHTML(u.name)}</strong>
+              <div class="muted small">${escapeHTML(u.email)}</div>
+              ${role === "child" ? `<div class="muted small">${parentName ? "Vinculado a: " + escapeHTML(parentName) : "Sin padre/madre vinculado"}</div>` : ""}
             </div>
           </div>
           <div class="ios-list" style="margin-top:10px;">
@@ -451,9 +449,9 @@ function showResetPasswordForm(extraEl, email) {
         method: "POST",
         body: JSON.stringify({ password }),
       });
-      extraEl.querySelector("#rpResult").innerHTML = `<p class="feedback" style="color:#1F8B3C;">${data.tempPassword ? `Nueva contraseña: <strong>${data.tempPassword}</strong>` : "Se envió la nueva contraseña por correo."}</p>`;
+      extraEl.querySelector("#rpResult").innerHTML = `<p class="feedback" style="color:#1F8B3C;">${data.tempPassword ? `Nueva contraseña: <strong>${escapeHTML(data.tempPassword)}</strong>` : "Se envió la nueva contraseña por correo."}</p>`;
     } catch (e) {
-      extraEl.querySelector("#rpResult").innerHTML = `<p class="feedback" style="color:#C22A20;">${e.message}</p>`;
+      extraEl.querySelector("#rpResult").innerHTML = `<p class="feedback" style="color:#C22A20;">${escapeHTML(e.message)}</p>`;
     }
   });
 }
@@ -464,7 +462,7 @@ function showLinkParentForm(extraEl, email, users) {
     <div class="card" style="margin-top:8px; background:var(--ios-bg);">
       <select id="lpParent" class="ios-select">
         <option value="">Sin padre/madre asignado</option>
-        ${parents.map((p) => `<option value="${p.email}">${p.name} (${p.email})</option>`).join("")}
+        ${parents.map((p) => `<option value="${escapeHTML(p.email)}">${escapeHTML(p.name)} (${escapeHTML(p.email)})</option>`).join("")}
       </select>
       <div id="lpResult"></div>
       <button class="btn btn-primary small" id="lpSubmit">Confirmar</button>
@@ -478,7 +476,7 @@ function showLinkParentForm(extraEl, email, users) {
       });
       renderAdminUsers();
     } catch (e) {
-      extraEl.querySelector("#lpResult").innerHTML = `<p class="feedback" style="color:#C22A20;">${e.message}</p>`;
+      extraEl.querySelector("#lpResult").innerHTML = `<p class="feedback" style="color:#C22A20;">${escapeHTML(e.message)}</p>`;
     }
   });
 }
@@ -497,6 +495,6 @@ async function renderAdminChildProgress(email) {
     const data = await apiFetch("/api/admin/progress/" + encodeURIComponent(email));
     portalView.querySelector("#progressBlock").innerHTML = renderProgressBlock(data.state, email);
   } catch (e) {
-    portalView.querySelector("#progressBlock").innerHTML = `<div class="card"><p class="feedback" style="color:#C22A20;">${e.message}</p></div>`;
+    portalView.querySelector("#progressBlock").innerHTML = `<div class="card"><p class="feedback" style="color:#C22A20;">${escapeHTML(e.message)}</p></div>`;
   }
 }
